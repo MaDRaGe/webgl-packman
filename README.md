@@ -4,7 +4,11 @@
 
 ## Description
 
-The purpose of this project is to gain experiense in writting WebGL projects. So, 
+The purpose of this project is to gain experiense in writting WebGL projects. The project stack is next:
+
+- WebGL
+- Typescript
+- Parcel
 
 ## Usage
 The project is started using the command below, which starts parcel and turns on the server: 
