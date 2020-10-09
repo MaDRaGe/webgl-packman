@@ -1,5 +1,6 @@
 import GraphicObject from "./GraphicObject";
 import Mesh from "./Mesh";
+import { glm } from "./glm";
 
 type ShaderArray = {
   vertex: WebGLShader;
@@ -88,7 +89,13 @@ class Scene {
   }
 
   public draw() {
-    const resolUniformLocation = this.gl.getUniformLocation(
+    this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
+    this.gl.clearColor(0.5, 0.5, 0.5, 0.9);
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+    this.gl.enable(this.gl.CULL_FACE);
+    this.gl.enable(this.gl.DEPTH_TEST);
+    this.gl.useProgram(this.shaderProgram);
+    /*const resolUniformLocation = this.gl.getUniformLocation(
       this.shaderProgram,
       "u_resolution"
     );
@@ -96,7 +103,25 @@ class Scene {
       resolUniformLocation,
       this.gl.canvas.width,
       this.gl.canvas.height
-    );
+    );*/
+    const aspect = this.gl.canvas.width / this.gl.canvas.height;
+    const zNear = 1;
+    const zFar = 2000;
+
+    let cameraMatrix = glm.m4.yRotation(40);
+    cameraMatrix = glm.m4.translate(cameraMatrix, 0, 0, 10 * 1.5);
+
+    let viewMatrix = glm.m4.inverse(cameraMatrix);
+    let matrix = glm.m4.perspective(60, aspect, zNear, zFar);
+    let viewProjectionMatrix = glm.m4.multiply(matrix, viewMatrix);
+
+    const matrixLocation = this.gl.getUniformLocation(this.shaderProgram, "u_matrix");
+
+    const projectionMatrix = glm.projection(this.gl.canvas.width, this.gl.canvas.height);
+    matrix = glm.m4.translate(viewProjectionMatrix, 0, 0, 0);
+    matrix = glm.m4.zRotate(matrix, 60);
+    this.gl.uniformMatrix4fv(matrixLocation, false, matrix);
+
     const posAttribLocation = this.gl.getAttribLocation(
       this.shaderProgram,
       "a_position"
@@ -112,11 +137,6 @@ class Scene {
       0
     );
 
-    this.gl.useProgram(this.shaderProgram);
-    this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
-    this.gl.clearColor(0.5, 0.5, 0.5, 0.9);
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-    this.gl.enable(this.gl.DEPTH_TEST);
     this.meshes[0].draw(this.gl);
     //this.gl.drawArrays(this.gl.TRIANGLES, 0, 3);
 

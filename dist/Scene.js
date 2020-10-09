@@ -49,6 +49,9 @@ var Scene = (function () {
     Scene.prototype.draw = function () {
         var resolUniformLocation = this.gl.getUniformLocation(this.shaderProgram, "u_resolution");
         this.gl.uniform2f(resolUniformLocation, this.gl.canvas.width, this.gl.canvas.height);
+        var translation = this.gl.getUniformLocation(this.shaderProgram, "u_translation");
+        console.log(translation);
+        this.gl.uniform2f(translation, 0.5, 0.5);
         var posAttribLocation = this.gl.getAttribLocation(this.shaderProgram, "a_position");
         this.gl.enableVertexAttribArray(posAttribLocation);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshes[0].getArrayBuffer());
