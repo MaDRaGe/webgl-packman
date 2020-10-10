@@ -104,22 +104,33 @@ class Mesh {
     vt: glm.vec3[]
   ) {
     if (!this.vertexToIndex.has(param)) {
-      this.vertexToIndex.set(param, this.vertexToIndex.size + 1);
+      this.vertexToIndex.set(param, this.vertexToIndex.size);
       const indices: number[] = param.split("/").map((item) => {
         return +item;
       });
       this.vertices.push(
         new Vertex(v[indices[0] - 1], vn[indices[1] - 1], vt[indices[2] - 1])
       );
+      this.indices.push(this.vertexToIndex.size - 1);
     } else {
       this.indices.push(<number>this.vertexToIndex.get(param));
     }
   }
 
+
+  init = true;
+
   public draw(gl: WebGLRenderingContext) {
+    if (this.init) {
+      console.log(this.indices);
+      console.log(this.vertexToIndex);
+      this.init = false;
+    }
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.elementArrayBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.arrayBuffer);
     gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
   }
 
   private getVerticesPoints(): number[] {

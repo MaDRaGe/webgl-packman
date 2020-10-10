@@ -105,8 +105,16 @@ namespace glm {
 
 
   export namespace m4 {
+    export function degToRad(angleDeg: number): number {
+      return angleDeg / 180 * Math.PI;
+    }
+
+    export function radToDeg(angleRad: number): number {
+      return angleRad * Math.PI / 180;
+    }
+
     export function perspective(fieldOfViewInRadians: number, aspect: number, near: number, far: number): number[] {
-      const f:number = Math.tan(Math.PI * 0.5 - 0.5 * fieldOfViewInRadians / 180 * Math.PI);
+      const f:number = Math.tan(Math.PI * 0.5 - 0.5 * degToRad(fieldOfViewInRadians));
       const rangeInv:number = 1.0 / (near - far);
 
       return [
@@ -191,8 +199,8 @@ namespace glm {
     };
 
     export function xRotation(angleInRadians: number): number[] {
-      const c: number = Math.cos(angleInRadians / 180 * Math.PI);
-      const s: number = Math.sin(angleInRadians / 180 * Math.PI);
+      const c: number = Math.cos(degToRad(angleInRadians));
+      const s: number = Math.sin(degToRad(angleInRadians));
 
       return [
         1, 0, 0, 0,
@@ -203,8 +211,8 @@ namespace glm {
     };
 
     export function yRotation(angleInRadians: number): number[] {
-      const c: number = Math.cos(angleInRadians / 180 * Math.PI);
-      const s: number = Math.sin(angleInRadians / 180 * Math.PI);
+      const c: number = Math.cos(degToRad(angleInRadians));
+      const s: number = Math.sin(degToRad(angleInRadians));
 
       return [
         c, 0, -s, 0,
@@ -215,8 +223,8 @@ namespace glm {
     };
 
     export function zRotation(angleInRadians:number): number[] {
-      const c:number = Math.cos(angleInRadians / 180 * Math.PI);
-      const s:number = Math.sin(angleInRadians / 180 * Math.PI);
+      const c:number = Math.cos(degToRad(angleInRadians));
+      const s:number = Math.sin(degToRad(angleInRadians));
 
       return [
          c, s, 0, 0,

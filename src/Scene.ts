@@ -10,6 +10,10 @@ type ShaderArray = {
 class Scene {
   private objects: GraphicObject[] = [];
   private meshes: Mesh[] = [];
+  private cameraDist: number = 0;
+  private xRotate: number = 0;
+  private yRotate: number = 0;
+  private zRotate: number = 0;
 
   private scene: HTMLCanvasElement = <HTMLCanvasElement>(
     document.createElement("canvas")
@@ -37,6 +41,18 @@ class Scene {
       this.gl =
         <WebGLRenderingContext>this.scene.getContext("webgl") ||
         this.scene.getContext("experimental-webgl");
+      document.querySelector("#cameraDist")?.addEventListener("input", (event) => {
+        this.cameraDist = <number><unknown>(<HTMLInputElement>event.target).value;
+      });
+      document.querySelector("#xRotate")?.addEventListener("input", (event) => {
+        this.xRotate = <number><unknown>(<HTMLInputElement>event.target).value;
+      });
+      document.querySelector("#yRotate")?.addEventListener("input", (event) => {
+        this.yRotate = <number><unknown>(<HTMLInputElement>event.target).value;
+      });
+      document.querySelector("#zRotate")?.addEventListener("input", (event) => {
+        this.zRotate = <number><unknown>(<HTMLInputElement>event.target).value;
+      });
     }
   }
 
@@ -88,6 +104,7 @@ class Scene {
     this.meshes.push(mesh);
   }
 
+  angle = 0.1;
   public draw() {
     this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
     this.gl.clearColor(0.5, 0.5, 0.5, 0.9);
@@ -95,31 +112,27 @@ class Scene {
     this.gl.enable(this.gl.CULL_FACE);
     this.gl.enable(this.gl.DEPTH_TEST);
     this.gl.useProgram(this.shaderProgram);
-    /*const resolUniformLocation = this.gl.getUniformLocation(
-      this.shaderProgram,
-      "u_resolution"
-    );
-    this.gl.uniform2f(
-      resolUniformLocation,
-      this.gl.canvas.width,
-      this.gl.canvas.height
-    );*/
+
     const aspect = this.gl.canvas.width / this.gl.canvas.height;
     const zNear = 1;
     const zFar = 2000;
+    let matrix = glm.m4.perspective(10, aspect, zNear, zFar);
 
-    let cameraMatrix = glm.m4.yRotation(40);
-    cameraMatrix = glm.m4.translate(cameraMatrix, 0, 0, 10 * 1.5);
+    let cameraMatrix = glm.m4.yRotation(0);
+    cameraMatrix = glm.m4.translate(cameraMatrix, 0, 0, this.cameraDist * 1.5);
 
     let viewMatrix = glm.m4.inverse(cameraMatrix);
-    let matrix = glm.m4.perspective(60, aspect, zNear, zFar);
+    
     let viewProjectionMatrix = glm.m4.multiply(matrix, viewMatrix);
 
     const matrixLocation = this.gl.getUniformLocation(this.shaderProgram, "u_matrix");
 
     const projectionMatrix = glm.projection(this.gl.canvas.width, this.gl.canvas.height);
     matrix = glm.m4.translate(viewProjectionMatrix, 0, 0, 0);
-    matrix = glm.m4.zRotate(matrix, 60);
+    matrix = glm.m4.yRotate(matrix, this.angle);
+    this.angle += 0.1;
+    matrix = glm.m4.xRotate(matrix, this.xRotate);
+    matrix = glm.m4.zRotate(matrix, this.zRotate);
     this.gl.uniformMatrix4fv(matrixLocation, false, matrix);
 
     const posAttribLocation = this.gl.getAttribLocation(

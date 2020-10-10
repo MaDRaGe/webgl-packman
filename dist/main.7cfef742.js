@@ -392,8 +392,20 @@ parcelRequire = function (modules, cache, entry, globalName) {
       var m4;
 
       (function (m4) {
+        function degToRad(angleDeg) {
+          return angleDeg / 180 * Math.PI;
+        }
+
+        m4.degToRad = degToRad;
+
+        function radToDeg(angleRad) {
+          return angleRad * Math.PI / 180;
+        }
+
+        m4.radToDeg = radToDeg;
+
         function perspective(fieldOfViewInRadians, aspect, near, far) {
-          var f = Math.tan(Math.PI * 0.5 - 0.5 * fieldOfViewInRadians / 180 * Math.PI);
+          var f = Math.tan(Math.PI * 0.5 - 0.5 * degToRad(fieldOfViewInRadians));
           var rangeInv = 1.0 / (near - far);
           return [f / aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, (near + far) * rangeInv, -1, 0, 0, near * far * rangeInv * 2, 0];
         }
@@ -455,8 +467,8 @@ parcelRequire = function (modules, cache, entry, globalName) {
         ;
 
         function xRotation(angleInRadians) {
-          var c = Math.cos(angleInRadians / 180 * Math.PI);
-          var s = Math.sin(angleInRadians / 180 * Math.PI);
+          var c = Math.cos(degToRad(angleInRadians));
+          var s = Math.sin(degToRad(angleInRadians));
           return [1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1];
         }
 
@@ -464,8 +476,8 @@ parcelRequire = function (modules, cache, entry, globalName) {
         ;
 
         function yRotation(angleInRadians) {
-          var c = Math.cos(angleInRadians / 180 * Math.PI);
-          var s = Math.sin(angleInRadians / 180 * Math.PI);
+          var c = Math.cos(degToRad(angleInRadians));
+          var s = Math.sin(degToRad(angleInRadians));
           return [c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1];
         }
 
@@ -473,8 +485,8 @@ parcelRequire = function (modules, cache, entry, globalName) {
         ;
 
         function zRotation(angleInRadians) {
-          var c = Math.cos(angleInRadians / 180 * Math.PI);
-          var s = Math.sin(angleInRadians / 180 * Math.PI);
+          var c = Math.cos(degToRad(angleInRadians));
+          var s = Math.sin(degToRad(angleInRadians));
           return [c, s, 0, 0, -s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
         }
 
@@ -589,8 +601,16 @@ parcelRequire = function (modules, cache, entry, globalName) {
 
     var Scene = function () {
       function Scene(domSelector) {
+        var _this = this;
+
+        var _a, _b, _c, _d;
+
         this.objects = [];
         this.meshes = [];
+        this.cameraDist = 0;
+        this.xRotate = 0;
+        this.yRotate = 0;
+        this.zRotate = 0;
         this.scene = document.createElement("canvas");
         this.gl = this.scene.getContext("webgl");
         this.shaderProgram = this.gl.createProgram();
@@ -598,10 +618,23 @@ parcelRequire = function (modules, cache, entry, globalName) {
           vertex: this.gl.createShader(this.gl.VERTEX_SHADER),
           fragment: this.gl.createShader(this.gl.FRAGMENT_SHADER)
         };
+        this.angle = 0.1;
         this.scene = document.querySelector("" + domSelector);
 
         if (this.scene) {
           this.gl = this.scene.getContext("webgl") || this.scene.getContext("experimental-webgl");
+          (_a = document.querySelector("#cameraDist")) === null || _a === void 0 ? void 0 : _a.addEventListener("input", function (event) {
+            _this.cameraDist = event.target.value;
+          });
+          (_b = document.querySelector("#xRotate")) === null || _b === void 0 ? void 0 : _b.addEventListener("input", function (event) {
+            _this.xRotate = event.target.value;
+          });
+          (_c = document.querySelector("#yRotate")) === null || _c === void 0 ? void 0 : _c.addEventListener("input", function (event) {
+            _this.yRotate = event.target.value;
+          });
+          (_d = document.querySelector("#zRotate")) === null || _d === void 0 ? void 0 : _d.addEventListener("input", function (event) {
+            _this.zRotate = event.target.value;
+          });
         }
       }
 
@@ -654,13 +687,13 @@ parcelRequire = function (modules, cache, entry, globalName) {
         var zNear = 1;
         var zFar = 2000;
 
-        var cameraMatrix = _glm.glm.m4.yRotation(40);
+        var matrix = _glm.glm.m4.perspective(10, aspect, zNear, zFar);
 
-        cameraMatrix = _glm.glm.m4.translate(cameraMatrix, 0, 0, 10 * 1.5);
+        var cameraMatrix = _glm.glm.m4.yRotation(0);
+
+        cameraMatrix = _glm.glm.m4.translate(cameraMatrix, 0, 0, this.cameraDist * 1.5);
 
         var viewMatrix = _glm.glm.m4.inverse(cameraMatrix);
-
-        var matrix = _glm.glm.m4.perspective(60, aspect, zNear, zFar);
 
         var viewProjectionMatrix = _glm.glm.m4.multiply(matrix, viewMatrix);
 
@@ -669,7 +702,10 @@ parcelRequire = function (modules, cache, entry, globalName) {
         var projectionMatrix = _glm.glm.projection(this.gl.canvas.width, this.gl.canvas.height);
 
         matrix = _glm.glm.m4.translate(viewProjectionMatrix, 0, 0, 0);
-        matrix = _glm.glm.m4.zRotate(matrix, 60);
+        matrix = _glm.glm.m4.yRotate(matrix, this.angle);
+        this.angle += 0.1;
+        matrix = _glm.glm.m4.xRotate(matrix, this.xRotate);
+        matrix = _glm.glm.m4.zRotate(matrix, this.zRotate);
         this.gl.uniformMatrix4fv(matrixLocation, false, matrix);
         var posAttribLocation = this.gl.getAttribLocation(this.shaderProgram, "a_position");
         this.gl.enableVertexAttribArray(posAttribLocation);
@@ -859,6 +895,7 @@ parcelRequire = function (modules, cache, entry, globalName) {
         this.vertices = [];
         this.indices = [];
         this.vertexToIndex = new Map();
+        this.init = true;
       }
 
       Mesh.prototype.load = function (name, gl) {
@@ -950,20 +987,29 @@ parcelRequire = function (modules, cache, entry, globalName) {
 
       Mesh.prototype.addNewVertex = function (param, v, vn, vt) {
         if (!this.vertexToIndex.has(param)) {
-          this.vertexToIndex.set(param, this.vertexToIndex.size + 1);
+          this.vertexToIndex.set(param, this.vertexToIndex.size);
           var indices = param.split("/").map(function (item) {
             return +item;
           });
           this.vertices.push(new Vertex(v[indices[0] - 1], vn[indices[1] - 1], vt[indices[2] - 1]));
+          this.indices.push(this.vertexToIndex.size - 1);
         } else {
           this.indices.push(this.vertexToIndex.get(param));
         }
       };
 
       Mesh.prototype.draw = function (gl) {
+        if (this.init) {
+          console.log(this.indices);
+          console.log(this.vertexToIndex);
+          this.init = false;
+        }
+
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.elementArrayBuffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.arrayBuffer);
         gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
       };
 
       Mesh.prototype.getVerticesPoints = function () {
@@ -998,6 +1044,10 @@ parcelRequire = function (modules, cache, entry, globalName) {
       };
     }
 
+    var cameraDist = document.querySelector("#cameraDist");
+    cameraDist === null || cameraDist === void 0 ? void 0 : cameraDist.addEventListener("input", function (event) {
+      console.log((event === null || event === void 0 ? void 0 : event.target).value);
+    });
     var scene = new _Scene.default("#scene");
     scene.initShader("vertex", "#vertex-shader-2d");
     scene.initShader("fragment", "#fragment-shader-2d");
@@ -1038,7 +1088,7 @@ parcelRequire = function (modules, cache, entry, globalName) {
     if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
       var hostname = "" || location.hostname;
       var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-      var ws = new WebSocket(protocol + '://' + hostname + ':' + "64346" + '/');
+      var ws = new WebSocket(protocol + '://' + hostname + ':' + "49898" + '/');
 
       ws.onmessage = function (event) {
         checkedAssets = {};
@@ -1244,7 +1294,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64331" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49899" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

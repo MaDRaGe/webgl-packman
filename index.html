@@ -10,12 +10,58 @@
       Your browser doesn't appear to support the HTML5
       <code>&lt;canvas&gt;</code> element.
     </canvas>
+    <div>
+      <label for="cameraDist">
+        Camera dist
+        <input
+          type="range"
+          name="cameraDist"
+          id="cameraDist"
+          value="0"
+          min="0"
+          max="100"
+        />
+      </label>
+      <label for="xRotate">
+        x rotate
+        <input
+          type="range"
+          name="xRotate"
+          id="xRotate"
+          value="0"
+          min="0"
+          max="360"
+        />
+      </label>
+      <label for="yRotate">
+        y rotate
+        <input
+          type="range"
+          name="yRotate"
+          id="yRotate"
+          value="0"
+          min="0"
+          max="360"
+        />
+      </label>
+      <label for="zRotate">
+        z rotate
+        <input
+          type="range"
+          name="zRotate"
+          id="zRotate"
+          value="0"
+          min="0"
+          max="360"
+        />
+      </label>
+    </div>
     <script id="vertex-shader-2d" type="notjs">
-      attribute vec4 a_position;
+      attribute vec3 a_position;
       uniform mat4 u_matrix;
       void main() {
 
-        gl_Position = u_matrix * a_position;
+        gl_Position = u_matrix * vec4(a_position, 1);
       }
     </script>
 
