@@ -29,6 +29,12 @@ class Mesh {
   // @ts-ignore
   private elementArrayBuffer: WebGLBuffer;
 
+  // @ts-ignore
+  private normalCoordBuffer: WebGLBuffer;
+
+  // @ts-ignore
+  private texCoordBuffer: WebGLBuffer;
+
   constructor() {}
 
   public async load(name: String, gl: WebGLRenderingContext): Promise<void> {
@@ -56,6 +62,16 @@ class Mesh {
         gl.STATIC_DRAW
       );
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+      this.normalCoordBuffer = <WebGLBuffer>gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.normalCoordBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.getVerticesNormals()), gl.STATIC_DRAW);
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+      this.texCoordBuffer = <WebGLBuffer>gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.getVerticesTexCoords()), gl.STATIC_DRAW);
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
     } catch (error) {
       console.error(error);
     }
@@ -109,7 +125,7 @@ class Mesh {
         return +item;
       });
       this.vertices.push(
-        new Vertex(v[indices[0] - 1], vn[indices[1] - 1], vt[indices[2] - 1])
+        new Vertex(v[indices[0] - 1], vn[indices[2] - 1], vt[indices[1] - 1])
       );
       this.indices.push(this.vertexToIndex.size - 1);
     } else {
@@ -122,6 +138,7 @@ class Mesh {
 
   public draw(gl: WebGLRenderingContext) {
     if (this.init) {
+      console.log(this.vertices);
       console.log(this.indices);
       console.log(this.vertexToIndex);
       this.init = false;
@@ -142,8 +159,32 @@ class Mesh {
     return verticesPoints;
   }
 
+  private getVerticesNormals(): number[] {
+    const verticesNormals: number[] = this.vertices.map((vertex) => {
+      return [vertex.normal.x, vertex.normal.y, vertex.normal.z];
+    })
+    .flat();
+    return verticesNormals;
+  }
+
+  private getVerticesTexCoords(): number[] {
+    const verticesTexCoords: number[] = this.vertices.map((vertex) => {
+      return [vertex.texCoord.x, vertex.texCoord.y];
+    })
+    .flat();
+    return verticesTexCoords;
+  }
+
   public getArrayBuffer(): WebGLBuffer {
     return this.arrayBuffer;
+  }
+
+  public getTexCoordBuffer(): WebGLBuffer {
+    return this.texCoordBuffer;
+  }
+
+  public getNormalCoordBuffer(): WebGLBuffer {
+    return this.normalCoordBuffer;
   }
 }
 

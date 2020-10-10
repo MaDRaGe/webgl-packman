@@ -88,12 +88,44 @@ class Scene {
     return false;
   }
 
+  private vertexPosAttr: number = 0;
+  private vertexTextureAttr: number = 0;
+  private vertexNormalAttr: number = 0;
+  private MVMatrix:any = null;
+  private PMatrix:any = null;
+  private NMatrix:any = null;
+  private lightPosition:any = null;
+  private ambient:any = null;
+  private diffuse:any = null;
+  private specular:any = null;
   public initShaderProgram(): Boolean {
     this.shaderProgram = <WebGLProgram>this.gl.createProgram();
     this.gl.attachShader(this.shaderProgram, this.shaders.vertex);
     this.gl.attachShader(this.shaderProgram, this.shaders.fragment);
     this.gl.linkProgram(this.shaderProgram);
     if (this.gl.getProgramParameter(this.shaderProgram, this.gl.LINK_STATUS)) {
+      this.gl.useProgram(this.shaderProgram);  
+      this.vertexPosAttr = this.gl.getAttribLocation(this.shaderProgram, "a_vertexPosition");
+      this.gl.enableVertexAttribArray(this.vertexPosAttr);
+      this.vertexTextureAttr = this.gl.getAttribLocation(this.shaderProgram, "a_vertexTextureCoords");
+      this.gl.enableVertexAttribArray(this.vertexTextureAttr);
+      this.vertexNormalAttr = this.gl.getAttribLocation(this.shaderProgram, "a_vertexNormal");
+      this.gl.enableVertexAttribArray(this.vertexNormalAttr);
+      console.log(this.vertexPosAttr, this.vertexTextureAttr, this.vertexNormalAttr);
+      this.MVMatrix = this.gl.getUniformLocation(this.shaderProgram, "u_MVMatrix");
+      this.PMatrix = this.gl.getUniformLocation(this.shaderProgram, "u_PMatrix");
+      this.NMatrix = this.gl.getUniformLocation(this.shaderProgram, "u_NMatrix");
+      this.lightPosition = this.gl.getUniformLocation(this.shaderProgram, "u_lightPosition");
+      this.ambient = this.gl.getUniformLocation(this.shaderProgram, "u_ambientLightColor");
+      this.diffuse = this.gl.getUniformLocation(this.shaderProgram, "u_diffuseLightColor");
+      this.specular = this.gl.getUniformLocation(this.shaderProgram, "u_specularLightColor");
+      this.gl.uniform3fv(this.lightPosition, [0.0, 10.0, 5.0]);
+      this.gl.uniform3fv(this.ambient, [0.1, 0.1, 0.1]);
+      this.gl.uniform3fv(this.diffuse, [0.7, 0.7, 0.7]);
+      this.gl.uniform3fv(this.specular, [1.0, 1.0, 1.0]);
+      this.gl.uniformMatrix4fv(this.PMatrix,false, []);
+      this.gl.uniformMatrix4fv(this.MVMatrix, false, []);
+      this.gl.uniformMatrix3fv(this.NMatrix, false, []);
       return true;
     }
     console.log(this.gl.getProgramInfoLog(this.shaderProgram));
@@ -135,15 +167,28 @@ class Scene {
     matrix = glm.m4.zRotate(matrix, this.zRotate);
     this.gl.uniformMatrix4fv(matrixLocation, false, matrix);
 
-    const posAttribLocation = this.gl.getAttribLocation(
-      this.shaderProgram,
-      "a_position"
-    );
-    this.gl.enableVertexAttribArray(posAttribLocation);
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshes[0].getArrayBuffer());
     this.gl.vertexAttribPointer(
-      posAttribLocation,
+      this.vertexPosAttr,
       3,
+      this.gl.FLOAT,
+      false,
+      0,
+      0
+    );
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshes[0].getNormalCoordBuffer());
+    this.gl.vertexAttribPointer(
+      this.vertexNormalAttr,
+      3,
+      this.gl.FLOAT,
+      false,
+      0,
+      0
+    );
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshes[0].getTexCoordBuffer());
+    this.gl.vertexAttribPointer(
+      this.vertexTextureAttr,
+      2,
       this.gl.FLOAT,
       false,
       0,
@@ -151,7 +196,6 @@ class Scene {
     );
 
     this.meshes[0].draw(this.gl);
-    //this.gl.drawArrays(this.gl.TRIANGLES, 0, 3);
 
     requestAnimationFrame(this.draw.bind(this));
   }

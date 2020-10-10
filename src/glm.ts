@@ -1,4 +1,37 @@
 namespace glm {
+  export function cross(a: vec3, b: vec3): vec3 {
+    return new vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+  }
+
+  export function subtractVectors(a: vec3, b: vec3): vec3 {
+    return new vec3(a.x - b.x, a.y - b.y, a.z - b.z);
+  }
+
+  export function normalize(v: vec3): vec3 {
+    var length = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+    if (length > 0.00001) {
+      return new vec3(v.x / length, v.y / length, v.z / length);
+    } else {
+      return new vec3(0, 0, 0);
+    }
+  }
+
+  export function lookAt(cameraPosition: vec3, target: vec3, up: vec3): number[] {
+    const zAxis = normalize(subtractVectors(cameraPosition, target));
+    const xAxis = normalize(cross(up, zAxis));
+    const yAxis = normalize(cross(zAxis, xAxis));
+
+    return [
+      xAxis.x, xAxis.y, xAxis.z, 0,
+      yAxis.x, yAxis.y, yAxis.z, 0,
+      zAxis.x, zAxis.y, zAxis.z, 0,
+      cameraPosition.x,
+      cameraPosition.y,
+      cameraPosition.z,
+      1,
+   ];
+  }
+
   export class vec2 {
     x: number = 0;
     y: number = 0;

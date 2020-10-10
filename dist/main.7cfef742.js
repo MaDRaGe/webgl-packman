@@ -276,6 +276,39 @@ parcelRequire = function (modules, cache, entry, globalName) {
     exports.glm = glm;
 
     (function (glm) {
+      function cross(a, b) {
+        return new vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+      }
+
+      glm.cross = cross;
+
+      function subtractVectors(a, b) {
+        return new vec3(a.x - b.x, a.y - b.y, a.z - b.z);
+      }
+
+      glm.subtractVectors = subtractVectors;
+
+      function normalize(v) {
+        var length = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+
+        if (length > 0.00001) {
+          return new vec3(v.x / length, v.y / length, v.z / length);
+        } else {
+          return new vec3(0, 0, 0);
+        }
+      }
+
+      glm.normalize = normalize;
+
+      function lookAt(cameraPosition, target, up) {
+        var zAxis = normalize(subtractVectors(cameraPosition, target));
+        var xAxis = normalize(cross(up, zAxis));
+        var yAxis = normalize(cross(zAxis, xAxis));
+        return [xAxis.x, xAxis.y, xAxis.z, 0, yAxis.x, yAxis.y, yAxis.z, 0, zAxis.x, zAxis.y, zAxis.z, 0, cameraPosition.x, cameraPosition.y, cameraPosition.z, 1];
+      }
+
+      glm.lookAt = lookAt;
+
       var vec2 = function () {
         function vec2(x, y) {
           this.x = 0;
@@ -618,6 +651,16 @@ parcelRequire = function (modules, cache, entry, globalName) {
           vertex: this.gl.createShader(this.gl.VERTEX_SHADER),
           fragment: this.gl.createShader(this.gl.FRAGMENT_SHADER)
         };
+        this.vertexPosAttr = 0;
+        this.vertexTextureAttr = 0;
+        this.vertexNormalAttr = 0;
+        this.MVMatrix = null;
+        this.PMatrix = null;
+        this.NMatrix = null;
+        this.lightPosition = null;
+        this.ambient = null;
+        this.diffuse = null;
+        this.specular = null;
         this.angle = 0.1;
         this.scene = document.querySelector("" + domSelector);
 
@@ -665,6 +708,28 @@ parcelRequire = function (modules, cache, entry, globalName) {
         this.gl.linkProgram(this.shaderProgram);
 
         if (this.gl.getProgramParameter(this.shaderProgram, this.gl.LINK_STATUS)) {
+          this.gl.useProgram(this.shaderProgram);
+          this.vertexPosAttr = this.gl.getAttribLocation(this.shaderProgram, "a_vertexPosition");
+          this.gl.enableVertexAttribArray(this.vertexPosAttr);
+          this.vertexTextureAttr = this.gl.getAttribLocation(this.shaderProgram, "a_vertexTextureCoords");
+          this.gl.enableVertexAttribArray(this.vertexTextureAttr);
+          this.vertexNormalAttr = this.gl.getAttribLocation(this.shaderProgram, "a_vertexNormal");
+          this.gl.enableVertexAttribArray(this.vertexNormalAttr);
+          console.log(this.vertexPosAttr, this.vertexTextureAttr, this.vertexNormalAttr);
+          this.MVMatrix = this.gl.getUniformLocation(this.shaderProgram, "u_MVMatrix");
+          this.PMatrix = this.gl.getUniformLocation(this.shaderProgram, "u_PMatrix");
+          this.NMatrix = this.gl.getUniformLocation(this.shaderProgram, "u_NMatrix");
+          this.lightPosition = this.gl.getUniformLocation(this.shaderProgram, "u_lightPosition");
+          this.ambient = this.gl.getUniformLocation(this.shaderProgram, "u_ambientLightColor");
+          this.diffuse = this.gl.getUniformLocation(this.shaderProgram, "u_diffuseLightColor");
+          this.specular = this.gl.getUniformLocation(this.shaderProgram, "u_specularLightColor");
+          this.gl.uniform3fv(this.lightPosition, [0.0, 10.0, 5.0]);
+          this.gl.uniform3fv(this.ambient, [0.1, 0.1, 0.1]);
+          this.gl.uniform3fv(this.diffuse, [0.7, 0.7, 0.7]);
+          this.gl.uniform3fv(this.specular, [1.0, 1.0, 1.0]);
+          this.gl.uniformMatrix4fv(this.PMatrix, false, []);
+          this.gl.uniformMatrix4fv(this.MVMatrix, false, []);
+          this.gl.uniformMatrix3fv(this.NMatrix, false, []);
           return true;
         }
 
@@ -707,10 +772,12 @@ parcelRequire = function (modules, cache, entry, globalName) {
         matrix = _glm.glm.m4.xRotate(matrix, this.xRotate);
         matrix = _glm.glm.m4.zRotate(matrix, this.zRotate);
         this.gl.uniformMatrix4fv(matrixLocation, false, matrix);
-        var posAttribLocation = this.gl.getAttribLocation(this.shaderProgram, "a_position");
-        this.gl.enableVertexAttribArray(posAttribLocation);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshes[0].getArrayBuffer());
-        this.gl.vertexAttribPointer(posAttribLocation, 3, this.gl.FLOAT, false, 0, 0);
+        this.gl.vertexAttribPointer(this.vertexPosAttr, 3, this.gl.FLOAT, false, 0, 0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshes[0].getNormalCoordBuffer());
+        this.gl.vertexAttribPointer(this.vertexNormalAttr, 3, this.gl.FLOAT, false, 0, 0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshes[0].getTexCoordBuffer());
+        this.gl.vertexAttribPointer(this.vertexTextureAttr, 2, this.gl.FLOAT, false, 0, 0);
         this.meshes[0].draw(this.gl);
         requestAnimationFrame(this.draw.bind(this));
       };
@@ -923,6 +990,14 @@ parcelRequire = function (modules, cache, entry, globalName) {
                 gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.elementArrayBuffer);
                 gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
                 gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+                this.normalCoordBuffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.normalCoordBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.getVerticesNormals()), gl.STATIC_DRAW);
+                gl.bindBuffer(gl.ARRAY_BUFFER, null);
+                this.texCoordBuffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.getVerticesTexCoords()), gl.STATIC_DRAW);
+                gl.bindBuffer(gl.ARRAY_BUFFER, null);
                 return [3, 4];
 
               case 3:
@@ -991,7 +1066,7 @@ parcelRequire = function (modules, cache, entry, globalName) {
           var indices = param.split("/").map(function (item) {
             return +item;
           });
-          this.vertices.push(new Vertex(v[indices[0] - 1], vn[indices[1] - 1], vt[indices[2] - 1]));
+          this.vertices.push(new Vertex(v[indices[0] - 1], vn[indices[2] - 1], vt[indices[1] - 1]));
           this.indices.push(this.vertexToIndex.size - 1);
         } else {
           this.indices.push(this.vertexToIndex.get(param));
@@ -1000,6 +1075,7 @@ parcelRequire = function (modules, cache, entry, globalName) {
 
       Mesh.prototype.draw = function (gl) {
         if (this.init) {
+          console.log(this.vertices);
           console.log(this.indices);
           console.log(this.vertexToIndex);
           this.init = false;
@@ -1019,8 +1095,30 @@ parcelRequire = function (modules, cache, entry, globalName) {
         return verticesPoints;
       };
 
+      Mesh.prototype.getVerticesNormals = function () {
+        var verticesNormals = this.vertices.map(function (vertex) {
+          return [vertex.normal.x, vertex.normal.y, vertex.normal.z];
+        }).flat();
+        return verticesNormals;
+      };
+
+      Mesh.prototype.getVerticesTexCoords = function () {
+        var verticesTexCoords = this.vertices.map(function (vertex) {
+          return [vertex.texCoord.x, vertex.texCoord.y];
+        }).flat();
+        return verticesTexCoords;
+      };
+
       Mesh.prototype.getArrayBuffer = function () {
         return this.arrayBuffer;
+      };
+
+      Mesh.prototype.getTexCoordBuffer = function () {
+        return this.texCoordBuffer;
+      };
+
+      Mesh.prototype.getNormalCoordBuffer = function () {
+        return this.normalCoordBuffer;
       };
 
       return Mesh;
@@ -1088,7 +1186,7 @@ parcelRequire = function (modules, cache, entry, globalName) {
     if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
       var hostname = "" || location.hostname;
       var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-      var ws = new WebSocket(protocol + '://' + hostname + ':' + "49898" + '/');
+      var ws = new WebSocket(protocol + '://' + hostname + ':' + "64566" + '/');
 
       ws.onmessage = function (event) {
         checkedAssets = {};
@@ -1294,7 +1392,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49899" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64829" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
