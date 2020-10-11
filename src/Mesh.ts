@@ -1,4 +1,5 @@
 import { glm } from "./glm";
+import GL from "./GL";
 
 class Vertex {
   public coord: glm.vec3;
@@ -135,14 +136,41 @@ class Mesh {
 
 
   init = true;
-
-  public draw(gl: WebGLRenderingContext) {
+  public draw() {
     if (this.init) {
       console.log(this.vertices);
       console.log(this.indices);
       console.log(this.vertexToIndex);
       this.init = false;
     }
+    const gl = GL.getGL();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.arrayBuffer);
+    gl.vertexAttribPointer(
+      GL.getVertexAttr("a_vertexPosition"),
+      3,
+      gl.FLOAT,
+      false,
+      0,
+      0
+    );
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.normalCoordBuffer);
+    gl.vertexAttribPointer(
+      GL.getVertexAttr("a_vertexNormal"),
+      3,
+      gl.FLOAT,
+      false,
+      0,
+      0
+    );
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer);
+    gl.vertexAttribPointer(
+      GL.getVertexAttr("a_vertexTextureCoords"),
+      2,
+      gl.FLOAT,
+      false,
+      0,
+      0
+    );
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.elementArrayBuffer);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.arrayBuffer);
     gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);

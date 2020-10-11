@@ -7,10 +7,11 @@ class GraphicObject {
   private position: glm.vec3 = new glm.vec3(0, 0, 0);
   private modelMatrix: number[] = [];
 
-  constructor(mesh: Mesh, angle: number = 0, position: glm.vec3 = new glm.vec3(0, 0, 0)) {
+  constructor(mesh: Mesh = new Mesh(), angle: number = 0, position: glm.vec3 = new glm.vec3(0, 0, 0)) {
     this.mesh = mesh;
     this.angle = angle;
     this.position = position;
+    this.modelMatrix = new Array(16).fill(0);
     this.calcModelMatrix();
   }
 
@@ -45,8 +46,16 @@ class GraphicObject {
     return this.position;
   }
 
-  private calcModelMatrix():void {
+  private calcModelMatrix(): void {
+    this.modelMatrix[0] = Math.cos(glm.radToDeg(this.angle));
+    this.modelMatrix[2] = Math.sin(glm.radToDeg(this.angle));
 
+    this.modelMatrix[8] = -Math.sin(glm.radToDeg(this.angle));
+    this.modelMatrix[10] = Math.cos(glm.radToDeg(this.angle));
+
+    this.modelMatrix[12] = this.position.x;
+    this.modelMatrix[13] = this.position.y;
+    this.modelMatrix[14] = this.position.z;
   }
 }
 

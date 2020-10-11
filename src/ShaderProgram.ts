@@ -48,45 +48,13 @@ class ShaderProgram {
     return false;
   }
 
-  private vertexPosAttr: number = 0;
-  private vertexTextureAttr: number = 0;
-  private vertexNormalAttr: number = 0;
-  private MVMatrix:any = null;
-  private PMatrix:any = null;
-  private NMatrix:any = null;
-  private lightPosition:any = null;
-  private ambient:any = null;
-  private diffuse:any = null;
-  private specular:any = null;
-
   public initShaderProgram(gl: WebGLRenderingContext): Boolean {
     this.shaderProgram = <WebGLProgram>gl.createProgram();
     gl.attachShader(this.shaderProgram, this.shaders.vertex);
     gl.attachShader(this.shaderProgram, this.shaders.fragment);
     gl.linkProgram(this.shaderProgram);
     if (gl.getProgramParameter(this.shaderProgram, gl.LINK_STATUS)) {
-
-      // Get attributes and uniforms
-      gl.useProgram(this.shaderProgram);  
-      this.vertexPosAttr = gl.getAttribLocation(this.shaderProgram, "a_vertexPosition");
-      gl.enableVertexAttribArray(this.vertexPosAttr);
-      this.vertexTextureAttr = gl.getAttribLocation(this.shaderProgram, "a_vertexTextureCoords");
-      gl.enableVertexAttribArray(this.vertexTextureAttr);
-      this.vertexNormalAttr = gl.getAttribLocation(this.shaderProgram, "a_vertexNormal");
-      gl.enableVertexAttribArray(this.vertexNormalAttr);
-      this.MVMatrix = gl.getUniformLocation(this.shaderProgram, "u_MVMatrix");
-      this.PMatrix = gl.getUniformLocation(this.shaderProgram, "u_PMatrix");
-      this.NMatrix = gl.getUniformLocation(this.shaderProgram, "u_NMatrix");
-      this.lightPosition = gl.getUniformLocation(this.shaderProgram, "u_lightPosition");
-      this.ambient = gl.getUniformLocation(this.shaderProgram, "u_ambientLightColor");
-      this.diffuse = gl.getUniformLocation(this.shaderProgram, "u_diffuseLightColor");
-      this.specular = gl.getUniformLocation(this.shaderProgram, "u_specularLightColor");
-      gl.uniform3fv(this.lightPosition, [0.0, 10.0, 5.0]);
-      gl.uniform3fv(this.ambient, [0.1, 0.1, 0.1]);
-      gl.uniform3fv(this.diffuse, [0.7, 0.7, 0.7]);
-      gl.uniform3fv(this.specular, [1.0, 1.0, 1.0]);
-
-
+      gl.useProgram(this.shaderProgram); 
       return true;
     }
     console.log(gl.getProgramInfoLog(this.shaderProgram));
@@ -118,6 +86,10 @@ class ShaderProgram {
 
   public apply(gl: WebGLRenderingContext): void {
     gl.useProgram(this.shaderProgram);
+  }
+
+  public getVertexAttr(name: string): number {
+    return <number>this.attributes.get(name);
   }
 }
 export default ShaderProgram;

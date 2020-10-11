@@ -1,4 +1,12 @@
 namespace glm {
+  export function degToRad(angleDeg: number): number {
+    return angleDeg / 180 * Math.PI;
+  }
+
+  export function radToDeg(angleRad: number): number {
+    return angleRad * Math.PI / 180;
+  }
+  
   export function get2dMatrix(m: number[]): number[][] {
     let matrix2d: number[][] = [];
     while(m.length) matrix2d.push(m.splice(0,4));
@@ -148,14 +156,6 @@ namespace glm {
 
 
   export namespace m4 {
-    export function degToRad(angleDeg: number): number {
-      return angleDeg / 180 * Math.PI;
-    }
-
-    export function radToDeg(angleRad: number): number {
-      return angleRad * Math.PI / 180;
-    }
-
     export function perspective(fieldOfViewInRadians: number, aspect: number, near: number, far: number): number[] {
       const f:number = Math.tan(Math.PI * 0.5 - 0.5 * degToRad(fieldOfViewInRadians));
       const rangeInv:number = 1.0 / (near - far);

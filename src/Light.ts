@@ -1,4 +1,5 @@
 import { glm } from "./glm";
+import GL from "./GL";
 
 type LightSettings = {
   position: glm.vec3,
@@ -67,8 +68,12 @@ class Light {
   public getShininess(): number {
     return this.shininess;
   }
-  public apply() {
 
+  public apply() {
+    GL.setUniform3fv("u_lightPosition", [0.0, 10.0, 5.0]);
+    GL.setUniform3fv("u_ambientLightColor", [0.1, 0.1, 0.1]);
+    GL.setUniform3fv("u_diffuseLightColor", [0.7, 0.7, 0.7]);
+    GL.setUniform3fv("u_specularLightColor", [1.0, 1.0, 1.0]);
   }
 }
 export default Light;
