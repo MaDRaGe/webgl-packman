@@ -238,6 +238,69 @@ parcelRequire = function (modules, cache, entry, globalName) {
 
   return newRequire;
 }({
+  "Scene.ts": [function (require, module, exports) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+      value: true
+    });
+    exports.default = void 0;
+
+    var Scene = function () {
+      function Scene(domSelector) {
+        var _this = this;
+
+        var _a, _b, _c, _d;
+
+        this.objects = [];
+        this.meshes = [];
+        this.cameraDist = 0;
+        this.xRotate = 0;
+        this.yRotate = 0;
+        this.zRotate = 0;
+        this.scene = document.createElement("canvas");
+        this.gl = this.scene.getContext("webgl");
+        this.shaderProgram = this.gl.createProgram();
+        this.shaders = {
+          vertex: this.gl.createShader(this.gl.VERTEX_SHADER),
+          fragment: this.gl.createShader(this.gl.FRAGMENT_SHADER)
+        };
+        this.angle = 0.1;
+        this.scene = document.querySelector("" + domSelector);
+
+        if (this.scene) {
+          this.gl = this.scene.getContext("webgl") || this.scene.getContext("experimental-webgl");
+          (_a = document.querySelector("#cameraDist")) === null || _a === void 0 ? void 0 : _a.addEventListener("input", function (event) {
+            _this.cameraDist = event.target.value;
+          });
+          (_b = document.querySelector("#xRotate")) === null || _b === void 0 ? void 0 : _b.addEventListener("input", function (event) {
+            _this.xRotate = event.target.value;
+          });
+          (_c = document.querySelector("#yRotate")) === null || _c === void 0 ? void 0 : _c.addEventListener("input", function (event) {
+            _this.yRotate = event.target.value;
+          });
+          (_d = document.querySelector("#zRotate")) === null || _d === void 0 ? void 0 : _d.addEventListener("input", function (event) {
+            _this.zRotate = event.target.value;
+          });
+        }
+      }
+
+      Scene.prototype.addMesh = function (mesh) {
+        this.meshes.push(mesh);
+      };
+
+      Scene.prototype.draw = function () {};
+
+      Scene.prototype.getGl = function () {
+        return this.gl;
+      };
+
+      return Scene;
+    }();
+
+    var _default = Scene;
+    exports.default = _default;
+  }, {}],
   "glm.ts": [function (require, module, exports) {
     "use strict";
 
@@ -276,6 +339,33 @@ parcelRequire = function (modules, cache, entry, globalName) {
     exports.glm = glm;
 
     (function (glm) {
+      function get2dMatrix(m) {
+        var matrix2d = [];
+
+        while (m.length) {
+          matrix2d.push(m.splice(0, 4));
+        }
+
+        return matrix2d;
+      }
+
+      glm.get2dMatrix = get2dMatrix;
+
+      function transpose(m) {
+        var matrix2d = get2dMatrix(m);
+        return matrix2d[0].map(function (x, i) {
+          return matrix2d.map(function (x) {
+            return x[i];
+          });
+        }).flat();
+      }
+
+      glm.transpose = transpose;
+
+      function inverse() {}
+
+      glm.inverse = inverse;
+
       function cross(a, b) {
         return new vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
       }
@@ -622,178 +712,6 @@ parcelRequire = function (modules, cache, entry, globalName) {
       })(m4 = glm.m4 || (glm.m4 = {}));
     })(glm || (exports.glm = glm = {}));
   }, {}],
-  "Scene.ts": [function (require, module, exports) {
-    "use strict";
-
-    Object.defineProperty(exports, "__esModule", {
-      value: true
-    });
-    exports.default = void 0;
-
-    var _glm = require("./glm");
-
-    var Scene = function () {
-      function Scene(domSelector) {
-        var _this = this;
-
-        var _a, _b, _c, _d;
-
-        this.objects = [];
-        this.meshes = [];
-        this.cameraDist = 0;
-        this.xRotate = 0;
-        this.yRotate = 0;
-        this.zRotate = 0;
-        this.scene = document.createElement("canvas");
-        this.gl = this.scene.getContext("webgl");
-        this.shaderProgram = this.gl.createProgram();
-        this.shaders = {
-          vertex: this.gl.createShader(this.gl.VERTEX_SHADER),
-          fragment: this.gl.createShader(this.gl.FRAGMENT_SHADER)
-        };
-        this.vertexPosAttr = 0;
-        this.vertexTextureAttr = 0;
-        this.vertexNormalAttr = 0;
-        this.MVMatrix = null;
-        this.PMatrix = null;
-        this.NMatrix = null;
-        this.lightPosition = null;
-        this.ambient = null;
-        this.diffuse = null;
-        this.specular = null;
-        this.angle = 0.1;
-        this.scene = document.querySelector("" + domSelector);
-
-        if (this.scene) {
-          this.gl = this.scene.getContext("webgl") || this.scene.getContext("experimental-webgl");
-          (_a = document.querySelector("#cameraDist")) === null || _a === void 0 ? void 0 : _a.addEventListener("input", function (event) {
-            _this.cameraDist = event.target.value;
-          });
-          (_b = document.querySelector("#xRotate")) === null || _b === void 0 ? void 0 : _b.addEventListener("input", function (event) {
-            _this.xRotate = event.target.value;
-          });
-          (_c = document.querySelector("#yRotate")) === null || _c === void 0 ? void 0 : _c.addEventListener("input", function (event) {
-            _this.yRotate = event.target.value;
-          });
-          (_d = document.querySelector("#zRotate")) === null || _d === void 0 ? void 0 : _d.addEventListener("input", function (event) {
-            _this.zRotate = event.target.value;
-          });
-        }
-      }
-
-      Scene.prototype.initShader = function (type, sourceDom) {
-        var _a, _b, _c, _d;
-
-        if (type === "vertex") {
-          this.shaders[type] = (_a = this.gl) === null || _a === void 0 ? void 0 : _a.createShader(this.gl.VERTEX_SHADER);
-        } else {
-          this.shaders[type] = (_b = this.gl) === null || _b === void 0 ? void 0 : _b.createShader(this.gl.FRAGMENT_SHADER);
-        }
-
-        (_c = this.gl) === null || _c === void 0 ? void 0 : _c.shaderSource(this.shaders[type], ((_d = document.querySelector("" + sourceDom)) === null || _d === void 0 ? void 0 : _d.textContent) || "");
-        this.gl.compileShader(this.shaders[type]);
-
-        if (this.gl.getShaderParameter(this.shaders[type], this.gl.COMPILE_STATUS)) {
-          return true;
-        }
-
-        console.log(this.gl.getShaderInfoLog(this.shaders[type]));
-        return false;
-      };
-
-      Scene.prototype.initShaderProgram = function () {
-        this.shaderProgram = this.gl.createProgram();
-        this.gl.attachShader(this.shaderProgram, this.shaders.vertex);
-        this.gl.attachShader(this.shaderProgram, this.shaders.fragment);
-        this.gl.linkProgram(this.shaderProgram);
-
-        if (this.gl.getProgramParameter(this.shaderProgram, this.gl.LINK_STATUS)) {
-          this.gl.useProgram(this.shaderProgram);
-          this.vertexPosAttr = this.gl.getAttribLocation(this.shaderProgram, "a_vertexPosition");
-          this.gl.enableVertexAttribArray(this.vertexPosAttr);
-          this.vertexTextureAttr = this.gl.getAttribLocation(this.shaderProgram, "a_vertexTextureCoords");
-          this.gl.enableVertexAttribArray(this.vertexTextureAttr);
-          this.vertexNormalAttr = this.gl.getAttribLocation(this.shaderProgram, "a_vertexNormal");
-          this.gl.enableVertexAttribArray(this.vertexNormalAttr);
-          console.log(this.vertexPosAttr, this.vertexTextureAttr, this.vertexNormalAttr);
-          this.MVMatrix = this.gl.getUniformLocation(this.shaderProgram, "u_MVMatrix");
-          this.PMatrix = this.gl.getUniformLocation(this.shaderProgram, "u_PMatrix");
-          this.NMatrix = this.gl.getUniformLocation(this.shaderProgram, "u_NMatrix");
-          this.lightPosition = this.gl.getUniformLocation(this.shaderProgram, "u_lightPosition");
-          this.ambient = this.gl.getUniformLocation(this.shaderProgram, "u_ambientLightColor");
-          this.diffuse = this.gl.getUniformLocation(this.shaderProgram, "u_diffuseLightColor");
-          this.specular = this.gl.getUniformLocation(this.shaderProgram, "u_specularLightColor");
-          this.gl.uniform3fv(this.lightPosition, [0.0, 10.0, 5.0]);
-          this.gl.uniform3fv(this.ambient, [0.1, 0.1, 0.1]);
-          this.gl.uniform3fv(this.diffuse, [0.7, 0.7, 0.7]);
-          this.gl.uniform3fv(this.specular, [1.0, 1.0, 1.0]);
-          this.gl.uniformMatrix4fv(this.PMatrix, false, []);
-          this.gl.uniformMatrix4fv(this.MVMatrix, false, []);
-          this.gl.uniformMatrix3fv(this.NMatrix, false, []);
-          return true;
-        }
-
-        console.log(this.gl.getProgramInfoLog(this.shaderProgram));
-        return false;
-      };
-
-      Scene.prototype.addMesh = function (mesh) {
-        this.meshes.push(mesh);
-      };
-
-      Scene.prototype.draw = function () {
-        this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
-        this.gl.clearColor(0.5, 0.5, 0.5, 0.9);
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-        this.gl.enable(this.gl.CULL_FACE);
-        this.gl.enable(this.gl.DEPTH_TEST);
-        this.gl.useProgram(this.shaderProgram);
-        var aspect = this.gl.canvas.width / this.gl.canvas.height;
-        var zNear = 1;
-        var zFar = 2000;
-
-        var matrix = _glm.glm.m4.perspective(10, aspect, zNear, zFar);
-
-        var cameraMatrix = _glm.glm.m4.yRotation(0);
-
-        cameraMatrix = _glm.glm.m4.translate(cameraMatrix, 0, 0, this.cameraDist * 1.5);
-
-        var viewMatrix = _glm.glm.m4.inverse(cameraMatrix);
-
-        var viewProjectionMatrix = _glm.glm.m4.multiply(matrix, viewMatrix);
-
-        var matrixLocation = this.gl.getUniformLocation(this.shaderProgram, "u_matrix");
-
-        var projectionMatrix = _glm.glm.projection(this.gl.canvas.width, this.gl.canvas.height);
-
-        matrix = _glm.glm.m4.translate(viewProjectionMatrix, 0, 0, 0);
-        matrix = _glm.glm.m4.yRotate(matrix, this.angle);
-        this.angle += 0.1;
-        matrix = _glm.glm.m4.xRotate(matrix, this.xRotate);
-        matrix = _glm.glm.m4.zRotate(matrix, this.zRotate);
-        this.gl.uniformMatrix4fv(matrixLocation, false, matrix);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshes[0].getArrayBuffer());
-        this.gl.vertexAttribPointer(this.vertexPosAttr, 3, this.gl.FLOAT, false, 0, 0);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshes[0].getNormalCoordBuffer());
-        this.gl.vertexAttribPointer(this.vertexNormalAttr, 3, this.gl.FLOAT, false, 0, 0);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshes[0].getTexCoordBuffer());
-        this.gl.vertexAttribPointer(this.vertexTextureAttr, 2, this.gl.FLOAT, false, 0, 0);
-        this.meshes[0].draw(this.gl);
-        requestAnimationFrame(this.draw.bind(this));
-      };
-
-      Scene.prototype.getGl = function () {
-        return this.gl;
-      };
-
-      return Scene;
-    }();
-
-    var _default = Scene;
-    exports.default = _default;
-  }, {
-    "./glm": "glm.ts"
-  }],
   "Mesh.ts": [function (require, module, exports) {
     "use strict";
 
@@ -1129,12 +1047,310 @@ parcelRequire = function (modules, cache, entry, globalName) {
   }, {
     "./glm": "glm.ts"
   }],
+  "ShaderProgram.ts": [function (require, module, exports) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+      value: true
+    });
+    exports.default = void 0;
+
+    var ShaderProgram = function () {
+      function ShaderProgram(gl) {
+        this.uniforms = new Map();
+        this.attributes = new Map();
+        this.vertexPosAttr = 0;
+        this.vertexTextureAttr = 0;
+        this.vertexNormalAttr = 0;
+        this.MVMatrix = null;
+        this.PMatrix = null;
+        this.NMatrix = null;
+        this.lightPosition = null;
+        this.ambient = null;
+        this.diffuse = null;
+        this.specular = null;
+        this.shaderProgram = gl.createProgram();
+        this.shaders = {
+          vertex: gl.createShader(gl.VERTEX_SHADER),
+          fragment: gl.createShader(gl.FRAGMENT_SHADER)
+        };
+      }
+
+      ShaderProgram.prototype.initShader = function (gl, type, sourceDom) {
+        var _a;
+
+        if (type === "vertex") {
+          this.shaders[type] = gl === null || gl === void 0 ? void 0 : gl.createShader(gl.VERTEX_SHADER);
+        } else {
+          this.shaders[type] = gl === null || gl === void 0 ? void 0 : gl.createShader(gl.FRAGMENT_SHADER);
+        }
+
+        gl === null || gl === void 0 ? void 0 : gl.shaderSource(this.shaders[type], ((_a = document.querySelector("" + sourceDom)) === null || _a === void 0 ? void 0 : _a.textContent) || "");
+        gl.compileShader(this.shaders[type]);
+
+        if (gl.getShaderParameter(this.shaders[type], gl.COMPILE_STATUS)) {
+          return true;
+        }
+
+        console.log(gl.getShaderInfoLog(this.shaders[type]));
+        return false;
+      };
+
+      ShaderProgram.prototype.initShaderProgram = function (gl) {
+        this.shaderProgram = gl.createProgram();
+        gl.attachShader(this.shaderProgram, this.shaders.vertex);
+        gl.attachShader(this.shaderProgram, this.shaders.fragment);
+        gl.linkProgram(this.shaderProgram);
+
+        if (gl.getProgramParameter(this.shaderProgram, gl.LINK_STATUS)) {
+          gl.useProgram(this.shaderProgram);
+          this.vertexPosAttr = gl.getAttribLocation(this.shaderProgram, "a_vertexPosition");
+          gl.enableVertexAttribArray(this.vertexPosAttr);
+          this.vertexTextureAttr = gl.getAttribLocation(this.shaderProgram, "a_vertexTextureCoords");
+          gl.enableVertexAttribArray(this.vertexTextureAttr);
+          this.vertexNormalAttr = gl.getAttribLocation(this.shaderProgram, "a_vertexNormal");
+          gl.enableVertexAttribArray(this.vertexNormalAttr);
+          this.MVMatrix = gl.getUniformLocation(this.shaderProgram, "u_MVMatrix");
+          this.PMatrix = gl.getUniformLocation(this.shaderProgram, "u_PMatrix");
+          this.NMatrix = gl.getUniformLocation(this.shaderProgram, "u_NMatrix");
+          this.lightPosition = gl.getUniformLocation(this.shaderProgram, "u_lightPosition");
+          this.ambient = gl.getUniformLocation(this.shaderProgram, "u_ambientLightColor");
+          this.diffuse = gl.getUniformLocation(this.shaderProgram, "u_diffuseLightColor");
+          this.specular = gl.getUniformLocation(this.shaderProgram, "u_specularLightColor");
+          gl.uniform3fv(this.lightPosition, [0.0, 10.0, 5.0]);
+          gl.uniform3fv(this.ambient, [0.1, 0.1, 0.1]);
+          gl.uniform3fv(this.diffuse, [0.7, 0.7, 0.7]);
+          gl.uniform3fv(this.specular, [1.0, 1.0, 1.0]);
+          return true;
+        }
+
+        console.log(gl.getProgramInfoLog(this.shaderProgram));
+        return false;
+      };
+
+      ShaderProgram.prototype.initUniform = function (gl, name) {
+        if (!this.uniforms.has(name)) {
+          var uniform = gl.getUniformLocation(this.shaderProgram, name);
+          this.uniforms.set(name, uniform);
+        }
+      };
+
+      ShaderProgram.prototype.initAttr = function (gl, name) {
+        if (!this.attributes.has(name)) {
+          var attribute = gl.getAttribLocation(this.shaderProgram, name);
+          gl.enableVertexAttribArray(attribute);
+          this.attributes.set(name, attribute);
+        }
+      };
+
+      ShaderProgram.prototype.setUniform3fv = function (gl, name, value) {
+        gl.uniform3fv(this.uniforms.get(name), value);
+      };
+
+      ShaderProgram.prototype.setUniformMatrix4fv = function (gl, name, value) {
+        gl.uniformMatrix4fv(this.uniforms.get(name), false, value);
+      };
+
+      ShaderProgram.prototype.apply = function (gl) {
+        gl.useProgram(this.shaderProgram);
+      };
+
+      return ShaderProgram;
+    }();
+
+    var _default = ShaderProgram;
+    exports.default = _default;
+  }, {}],
+  "Camera.ts": [function (require, module, exports) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+      value: true
+    });
+    exports.default = void 0;
+
+    var _glm = require("./glm");
+
+    var Camera = function () {
+      function Camera() {
+        this.position = new _glm.glm.vec3(0, 0, 0);
+        this.horizRotateAngle = 0;
+        this.vertRotateAngle = 0;
+        this.distanceToCenter = 0;
+      }
+
+      Camera.prototype.calcPosition = function () {};
+
+      Camera.prototype.setPosition = function () {};
+
+      Camera.prototype.getPosition = function () {
+        return new _glm.glm.vec3(0, 0, 0);
+      };
+
+      Camera.prototype.apply = function (gl) {};
+
+      return Camera;
+    }();
+
+    var _default = Camera;
+    exports.default = _default;
+  }, {
+    "./glm": "glm.ts"
+  }],
+  "Light.ts": [function (require, module, exports) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+      value: true
+    });
+    exports.default = void 0;
+
+    var _glm = require("./glm");
+
+    var Light = function () {
+      function Light(position, ambient, diffuse, specular, shininess) {
+        if (position === void 0) {
+          position = new _glm.glm.vec3(0, 0, 0);
+        }
+
+        if (ambient === void 0) {
+          ambient = new _glm.glm.vec3(0, 0, 0);
+        }
+
+        if (diffuse === void 0) {
+          diffuse = new _glm.glm.vec3(0, 0, 0);
+        }
+
+        if (specular === void 0) {
+          specular = new _glm.glm.vec3(0, 0, 0);
+        }
+
+        if (shininess === void 0) {
+          shininess = 0;
+        }
+
+        this.position = new _glm.glm.vec3(0, 0, 0);
+        this.ambient = new _glm.glm.vec3(0, 0, 0);
+        this.diffuse = new _glm.glm.vec3(0, 0, 0);
+        this.specular = new _glm.glm.vec3(0, 0, 0);
+        this.shininess = 0;
+        this.position = position;
+        this.ambient = ambient;
+        this.diffuse = diffuse;
+        this.specular = specular;
+        this.shininess = shininess;
+      }
+
+      Light.prototype.setPosition = function (position) {
+        this.position = position;
+      };
+
+      Light.prototype.getPosition = function () {
+        return this.position;
+      };
+
+      Light.prototype.setAmbient = function (ambient) {
+        this.ambient = ambient;
+      };
+
+      Light.prototype.getAmbient = function () {
+        return this.ambient;
+      };
+
+      Light.prototype.setDiffuse = function (diffuse) {
+        this.diffuse = diffuse;
+      };
+
+      Light.prototype.getDiffuse = function () {
+        return this.diffuse;
+      };
+
+      Light.prototype.setSpecular = function (specular) {
+        this.specular = specular;
+      };
+
+      Light.prototype.getSpecular = function () {
+        return this.specular;
+      };
+
+      Light.prototype.setShininess = function (shininess) {
+        this.shininess = shininess;
+      };
+
+      Light.prototype.getShininess = function () {
+        return this.shininess;
+      };
+
+      Light.prototype.apply = function () {};
+
+      return Light;
+    }();
+
+    var _default = Light;
+    exports.default = _default;
+  }, {
+    "./glm": "glm.ts"
+  }],
+  "GL.ts": [function (require, module, exports) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+      value: true
+    });
+    exports.default = void 0;
+
+    var _Camera = _interopRequireDefault(require("./Camera"));
+
+    var _Light = _interopRequireDefault(require("./Light"));
+
+    function _interopRequireDefault(obj) {
+      return obj && obj.__esModule ? obj : {
+        default: obj
+      };
+    }
+
+    var GL = function () {
+      function GL(canvasDOMSelector) {
+        this.light = new _Light.default();
+        this.camera = new _Camera.default();
+        this.gl = document.createElement("canvas").getContext("webgl");
+        this.shaderProgram = this.gl.createProgram();
+        var scene = document.querySelector(canvasDOMSelector);
+
+        if (scene) {
+          this.gl = scene.getContext("webgl") || scene.getContext("experimental-webgl");
+        }
+      }
+
+      GL.prototype.setShaderProgram = function (shaderProgram) {
+        this.shaderProgram = shaderProgram;
+      };
+
+      GL.prototype.setUniform = function (uniformName) {};
+
+      GL.prototype.getGL = function () {
+        return this.gl;
+      };
+
+      return GL;
+    }();
+
+    var _default = GL;
+    exports.default = _default;
+  }, {
+    "./Camera": "Camera.ts",
+    "./Light": "Light.ts"
+  }],
   "main.ts": [function (require, module, exports) {
     "use strict";
 
     var _Scene = _interopRequireDefault(require("./Scene"));
 
     var _Mesh = _interopRequireDefault(require("./Mesh"));
+
+    var _ShaderProgram = _interopRequireDefault(require("./ShaderProgram"));
+
+    var _GL = _interopRequireDefault(require("./GL"));
 
     function _interopRequireDefault(obj) {
       return obj && obj.__esModule ? obj : {
@@ -1147,16 +1363,30 @@ parcelRequire = function (modules, cache, entry, globalName) {
       console.log((event === null || event === void 0 ? void 0 : event.target).value);
     });
     var scene = new _Scene.default("#scene");
-    scene.initShader("vertex", "#vertex-shader-2d");
-    scene.initShader("fragment", "#fragment-shader-2d");
-    scene.initShaderProgram();
     var box = new _Mesh.default();
     box.load("Box", scene.getGl());
     scene.addMesh(box);
+    var gl = new _GL.default("#scene");
+    var shaderProgram = new _ShaderProgram.default(gl.getGL());
+    shaderProgram.initShader(gl.getGL(), "vertex", "#vertex-shader-2d");
+    shaderProgram.initShader(gl.getGL(), "fragment", "#fragment-shader-2d");
+    shaderProgram.initShaderProgram(gl.getGL());
+    shaderProgram.initUniform(gl.getGL(), "u_MVMatrix");
+    shaderProgram.initUniform(gl.getGL(), "u_PMatrix");
+    shaderProgram.initUniform(gl.getGL(), "u_NMatrix");
+    shaderProgram.initUniform(gl.getGL(), "u_lightPosition");
+    shaderProgram.initUniform(gl.getGL(), "u_ambientLightColor");
+    shaderProgram.initUniform(gl.getGL(), "u_diffuseLightColor");
+    shaderProgram.initUniform(gl.getGL(), "u_specularLightColor");
+    shaderProgram.initAttr(gl.getGL(), "a_vertexPosition");
+    shaderProgram.initAttr(gl.getGL(), "a_vertexTextureCoords");
+    shaderProgram.initAttr(gl.getGL(), "a_vertexNormal");
     requestAnimationFrame(scene.draw.bind(scene));
   }, {
     "./Scene": "Scene.ts",
-    "./Mesh": "Mesh.ts"
+    "./Mesh": "Mesh.ts",
+    "./ShaderProgram": "ShaderProgram.ts",
+    "./GL": "GL.ts"
   }],
   "../../../../../../../Users/Redal/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js": [function (require, module, exports) {
     var global = arguments[3];
@@ -1186,7 +1416,7 @@ parcelRequire = function (modules, cache, entry, globalName) {
     if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
       var hostname = "" || location.hostname;
       var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-      var ws = new WebSocket(protocol + '://' + hostname + ':' + "64566" + '/');
+      var ws = new WebSocket(protocol + '://' + hostname + ':' + "49659" + '/');
 
       ws.onmessage = function (event) {
         checkedAssets = {};
@@ -1392,7 +1622,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64829" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49660" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

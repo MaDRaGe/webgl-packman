@@ -1,4 +1,14 @@
 namespace glm {
+  export function get2dMatrix(m: number[]): number[][] {
+    let matrix2d: number[][] = [];
+    while(m.length) matrix2d.push(m.splice(0,4));
+    return matrix2d;
+  }
+  export function transpose(m: number[]): number[] {
+    const matrix2d: number[][] = get2dMatrix(m);
+    return matrix2d[0].map((x,i) => matrix2d.map(x => x[i])).flat();
+  }
+  export function inverse(){}
   export function cross(a: vec3, b: vec3): vec3 {
     return new vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
   }
