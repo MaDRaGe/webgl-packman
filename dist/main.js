@@ -560,151 +560,7 @@ var Camera = function () {
 
 var _default = Camera;
 exports.default = _default;
-},{"./glm":"glm.ts"}],"ShaderProgram.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _GL = _interopRequireDefault(require("./GL"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var ShaderProgram = function () {
-  function ShaderProgram() {
-    this.uniforms = new Map();
-    this.attributes = new Map();
-
-    var gl = _GL.default.getGL();
-
-    this.shaderProgram = gl.createProgram();
-    this.shaders = {
-      vertex: gl.createShader(gl.VERTEX_SHADER),
-      fragment: gl.createShader(gl.FRAGMENT_SHADER)
-    };
-  }
-
-  ShaderProgram.prototype.initShader = function (type, sourceDom) {
-    var _a;
-
-    var gl = _GL.default.getGL();
-
-    if (type === "vertex") {
-      this.shaders[type] = gl === null || gl === void 0 ? void 0 : gl.createShader(gl.VERTEX_SHADER);
-    } else {
-      this.shaders[type] = gl === null || gl === void 0 ? void 0 : gl.createShader(gl.FRAGMENT_SHADER);
-    }
-
-    gl === null || gl === void 0 ? void 0 : gl.shaderSource(this.shaders[type], ((_a = document.querySelector("" + sourceDom)) === null || _a === void 0 ? void 0 : _a.textContent) || "");
-    gl.compileShader(this.shaders[type]);
-
-    if (gl.getShaderParameter(this.shaders[type], gl.COMPILE_STATUS)) {
-      return true;
-    }
-
-    console.log(gl.getShaderInfoLog(this.shaders[type]));
-    return false;
-  };
-
-  ShaderProgram.prototype.initShaderProgram = function () {
-    var gl = _GL.default.getGL();
-
-    this.shaderProgram = gl.createProgram();
-    gl.attachShader(this.shaderProgram, this.shaders.vertex);
-    gl.attachShader(this.shaderProgram, this.shaders.fragment);
-    gl.linkProgram(this.shaderProgram);
-
-    if (gl.getProgramParameter(this.shaderProgram, gl.LINK_STATUS)) {
-      gl.useProgram(this.shaderProgram);
-      return true;
-    }
-
-    console.log(gl.getProgramInfoLog(this.shaderProgram));
-    return false;
-  };
-
-  ShaderProgram.prototype.initUniform = function (name) {
-    var gl = _GL.default.getGL();
-
-    if (!this.uniforms.has(name)) {
-      var uniform = gl.getUniformLocation(this.shaderProgram, name);
-      this.uniforms.set(name, uniform);
-    }
-  };
-
-  ShaderProgram.prototype.initAttr = function (name) {
-    var gl = _GL.default.getGL();
-
-    if (!this.attributes.has(name)) {
-      var attribute = gl.getAttribLocation(this.shaderProgram, name);
-      gl.enableVertexAttribArray(attribute);
-      this.attributes.set(name, attribute);
-    }
-  };
-
-  ShaderProgram.prototype.setUniform3fv = function (name, value) {
-    var gl = _GL.default.getGL();
-
-    gl.uniform3fv(this.uniforms.get(name), value);
-  };
-
-  ShaderProgram.prototype.setUniformMatrix4fv = function (name, value) {
-    var gl = _GL.default.getGL();
-
-    gl.uniformMatrix4fv(this.uniforms.get(name), false, value);
-  };
-
-  ShaderProgram.prototype.apply = function () {
-    var gl = _GL.default.getGL();
-
-    gl.useProgram(this.shaderProgram);
-  };
-
-  ShaderProgram.prototype.getVertexAttr = function (name) {
-    return this.attributes.get(name);
-  };
-
-  return ShaderProgram;
-}();
-
-var _default = ShaderProgram;
-exports.default = _default;
-},{"./GL":"GL.ts"}],"data.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.dataInit = dataInit;
-exports.shaderProgram = void 0;
-
-var _ShaderProgram = _interopRequireDefault(require("./ShaderProgram"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var shaderProgram;
-exports.shaderProgram = shaderProgram;
-
-function dataInit() {
-  exports.shaderProgram = shaderProgram = new _ShaderProgram.default();
-  shaderProgram.initShader("vertex", "#vertex-shader-2d");
-  shaderProgram.initShader("fragment", "#fragment-shader-2d");
-  shaderProgram.initShaderProgram();
-  shaderProgram.initUniform("u_MMatrix");
-  shaderProgram.initUniform("u_PMatrix");
-  shaderProgram.initUniform("u_NMatrix");
-  shaderProgram.initUniform("u_lightPosition");
-  shaderProgram.initUniform("u_ambientLightColor");
-  shaderProgram.initUniform("u_diffuseLightColor");
-  shaderProgram.initUniform("u_specularLightColor");
-  shaderProgram.initUniform("u_VMatrix");
-  shaderProgram.initAttr("a_vertexPosition");
-  shaderProgram.initAttr("a_vertexTextureCoords");
-  shaderProgram.initAttr("a_vertexNormal");
-}
-},{"./ShaderProgram":"ShaderProgram.ts"}],"Light.ts":[function(require,module,exports) {
+},{"./glm":"glm.ts"}],"Light.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -844,7 +700,7 @@ var GL = function () {
 var gl = new GL();
 var _default = gl;
 exports.default = _default;
-},{"./Camera":"Camera.ts","./Light":"Light.ts"}],"Scene.ts":[function(require,module,exports) {
+},{"./Camera":"Camera.ts","./Light":"Light.ts"}],"ShaderProgram.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -852,99 +708,110 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _glm = require("./glm");
-
 var _GL = _interopRequireDefault(require("./GL"));
-
-var _Light = _interopRequireDefault(require("./Light"));
-
-var _data = require("./data");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var Scene = function () {
-  function Scene() {
-    var _this = this;
+var ShaderProgram = function () {
+  function ShaderProgram() {
+    this.uniforms = new Map();
+    this.attributes = new Map();
 
-    var _a, _b, _c, _d;
-
-    this.objects = [];
-    this.meshes = [];
-    this.cameraDist = 0;
-    this.xRotate = 0;
-    this.yRotate = 0;
-    this.zRotate = 0;
-    this.light = new _Light.default();
-    this.angle = 0.1;
-    this.init = true;
-    (_a = document.querySelector("#cameraDist")) === null || _a === void 0 ? void 0 : _a.addEventListener("input", function (event) {
-      _this.cameraDist = event.target.value;
-    });
-    (_b = document.querySelector("#xRotate")) === null || _b === void 0 ? void 0 : _b.addEventListener("input", function (event) {
-      _this.xRotate = event.target.value;
-    });
-    (_c = document.querySelector("#yRotate")) === null || _c === void 0 ? void 0 : _c.addEventListener("input", function (event) {
-      _this.yRotate = event.target.value;
-    });
-    (_d = document.querySelector("#zRotate")) === null || _d === void 0 ? void 0 : _d.addEventListener("input", function (event) {
-      _this.zRotate = event.target.value;
-    });
-  }
-
-  Scene.prototype.addMesh = function (mesh) {
-    this.meshes.push(mesh);
-  };
-
-  Scene.prototype.addObject = function (object) {
-    this.objects.push(object);
-  };
-
-  Scene.prototype.draw = function () {
     var gl = _GL.default.getGL();
 
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-    gl.clearColor(0.1, 0.1, 0.5, 0.9);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.enable(gl.CULL_FACE);
-    gl.enable(gl.DEPTH_TEST);
-    this.light.apply();
-    var aspect = gl.canvas.width / gl.canvas.height;
-    var zNear = 1;
-    var zFar = 2000;
+    this.shaderProgram = gl.createProgram();
+    this.shaders = {
+      vertex: gl.createShader(gl.VERTEX_SHADER),
+      fragment: gl.createShader(gl.FRAGMENT_SHADER)
+    };
+  }
 
-    var pMatrix = _glm.glm.m4.perspective(45, aspect, zNear, zFar);
+  ShaderProgram.prototype.initShader = function (type, sourceDom) {
+    var _a;
 
-    _data.shaderProgram.setUniformMatrix4fv("u_PMatrix", pMatrix);
+    var gl = _GL.default.getGL();
 
-    var cameraMatrix = _glm.glm.m4.yRotation(0);
+    if (type === "vertex") {
+      this.shaders[type] = gl === null || gl === void 0 ? void 0 : gl.createShader(gl.VERTEX_SHADER);
+    } else {
+      this.shaders[type] = gl === null || gl === void 0 ? void 0 : gl.createShader(gl.FRAGMENT_SHADER);
+    }
 
-    cameraMatrix = _glm.glm.m4.translate(cameraMatrix, 0, 0, this.cameraDist * 1.5);
+    gl === null || gl === void 0 ? void 0 : gl.shaderSource(this.shaders[type], ((_a = document.querySelector("" + sourceDom)) === null || _a === void 0 ? void 0 : _a.textContent) || "");
+    gl.compileShader(this.shaders[type]);
 
-    var viewMatrix = _glm.glm.m4.inverse(cameraMatrix);
+    if (gl.getShaderParameter(this.shaders[type], gl.COMPILE_STATUS)) {
+      return true;
+    }
 
-    _data.shaderProgram.setUniformMatrix4fv("u_VMatrix", viewMatrix);
-
-    this.objects[0].setAngle(this.angle);
-    this.angle += 0.1;
-
-    _data.shaderProgram.setUniformMatrix4fv("u_MMatrix", this.objects[0].getModelMatrix());
-
-    var MVMatrix = _glm.glm.m4.multiply(viewMatrix, this.objects[0].getModelMatrix());
-
-    var NMatrix = _glm.glm.transpose(_glm.glm.m4.inverse(MVMatrix));
-
-    _data.shaderProgram.setUniformMatrix4fv("u_NMatrix", NMatrix);
-
-    this.objects[0].draw();
-    requestAnimationFrame(this.draw.bind(this));
+    console.log(gl.getShaderInfoLog(this.shaders[type]));
+    return false;
   };
 
-  return Scene;
+  ShaderProgram.prototype.initShaderProgram = function () {
+    var gl = _GL.default.getGL();
+
+    this.shaderProgram = gl.createProgram();
+    gl.attachShader(this.shaderProgram, this.shaders.vertex);
+    gl.attachShader(this.shaderProgram, this.shaders.fragment);
+    gl.linkProgram(this.shaderProgram);
+
+    if (gl.getProgramParameter(this.shaderProgram, gl.LINK_STATUS)) {
+      gl.useProgram(this.shaderProgram);
+      return true;
+    }
+
+    console.log(gl.getProgramInfoLog(this.shaderProgram));
+    return false;
+  };
+
+  ShaderProgram.prototype.initUniform = function (name) {
+    var gl = _GL.default.getGL();
+
+    if (!this.uniforms.has(name)) {
+      var uniform = gl.getUniformLocation(this.shaderProgram, name);
+      this.uniforms.set(name, uniform);
+    }
+  };
+
+  ShaderProgram.prototype.initAttr = function (name) {
+    var gl = _GL.default.getGL();
+
+    if (!this.attributes.has(name)) {
+      var attribute = gl.getAttribLocation(this.shaderProgram, name);
+      gl.enableVertexAttribArray(attribute);
+      this.attributes.set(name, attribute);
+    }
+  };
+
+  ShaderProgram.prototype.setUniform3fv = function (name, value) {
+    var gl = _GL.default.getGL();
+
+    gl.uniform3fv(this.uniforms.get(name), value);
+  };
+
+  ShaderProgram.prototype.setUniformMatrix4fv = function (name, value) {
+    var gl = _GL.default.getGL();
+
+    gl.uniformMatrix4fv(this.uniforms.get(name), false, value);
+  };
+
+  ShaderProgram.prototype.apply = function () {
+    var gl = _GL.default.getGL();
+
+    gl.useProgram(this.shaderProgram);
+  };
+
+  ShaderProgram.prototype.getVertexAttr = function (name) {
+    return this.attributes.get(name);
+  };
+
+  return ShaderProgram;
 }();
 
-var _default = Scene;
+var _default = ShaderProgram;
 exports.default = _default;
-},{"./glm":"glm.ts","./GL":"GL.ts","./Light":"Light.ts","./data":"data.ts"}],"Mesh.ts":[function(require,module,exports) {
+},{"./GL":"GL.ts"}],"Mesh.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1118,6 +985,7 @@ var Mesh = function () {
     this.vertices = [];
     this.indices = [];
     this.vertexToIndex = new Map();
+    this.init = true;
   }
 
   Mesh.prototype.load = function (name) {
@@ -1230,6 +1098,11 @@ var Mesh = function () {
   };
 
   Mesh.prototype.draw = function () {
+    if (this.init) {
+      console.log(this.vertices);
+      this.init = false;
+    }
+
     var gl = _GL.default.getGL();
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.arrayBuffer);
@@ -1376,34 +1249,519 @@ var GraphicObject = function () {
 
 var _default = GraphicObject;
 exports.default = _default;
-},{"./Mesh":"Mesh.ts","./glm":"glm.ts"}],"main.ts":[function(require,module,exports) {
+},{"./Mesh":"Mesh.ts","./glm":"glm.ts"}],"Scene.ts":[function(require,module,exports) {
 "use strict";
 
-var _Scene = _interopRequireDefault(require("./Scene"));
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
 
-var _Mesh = _interopRequireDefault(require("./Mesh"));
-
-var _GraphicObject = _interopRequireDefault(require("./GraphicObject"));
+var _glm = require("./glm");
 
 var _GL = _interopRequireDefault(require("./GL"));
+
+var _Light = _interopRequireDefault(require("./Light"));
 
 var _data = require("./data");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var scene = new _Scene.default();
-var box = new _Mesh.default();
-var object = new _GraphicObject.default();
+var Scene = function () {
+  function Scene() {
+    var _this = this;
 
-_GL.default.init("#scene");
+    var _a, _b, _c, _d;
 
-box.load("Box");
-object.setMesh(box);
-scene.addMesh(box);
-scene.addObject(object);
-(0, _data.dataInit)();
-requestAnimationFrame(scene.draw.bind(scene));
-},{"./Scene":"Scene.ts","./Mesh":"Mesh.ts","./GraphicObject":"GraphicObject.ts","./GL":"GL.ts","./data":"data.ts"}],"../../../../../../../Users/Redal/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+    this.objects = [];
+    this.meshes = [];
+    this.cameraDist = 0;
+    this.xRotate = 0;
+    this.yRotate = 0;
+    this.zRotate = 0;
+    this.light = new _Light.default();
+    this.angle = 0.1;
+    this.init = true;
+    this.cameraDist = document.querySelector("#cameraDist").value;
+    (_a = document.querySelector("#cameraDist")) === null || _a === void 0 ? void 0 : _a.addEventListener("input", function (event) {
+      _this.cameraDist = event.target.value;
+    });
+    (_b = document.querySelector("#xRotate")) === null || _b === void 0 ? void 0 : _b.addEventListener("input", function (event) {
+      _this.xRotate = event.target.value;
+    });
+    (_c = document.querySelector("#yRotate")) === null || _c === void 0 ? void 0 : _c.addEventListener("input", function (event) {
+      _this.yRotate = event.target.value;
+    });
+    (_d = document.querySelector("#zRotate")) === null || _d === void 0 ? void 0 : _d.addEventListener("input", function (event) {
+      _this.zRotate = event.target.value;
+    });
+  }
+
+  Scene.prototype.addMesh = function (mesh) {
+    this.meshes.push(mesh);
+  };
+
+  Scene.prototype.addObject = function (object) {
+    this.objects.push(object);
+  };
+
+  Scene.prototype.draw = function () {
+    var gl = _GL.default.getGL();
+
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    gl.clearColor(0.1, 0.1, 0.5, 0.9);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.enable(gl.CULL_FACE);
+    gl.enable(gl.DEPTH_TEST);
+    this.light.apply();
+    var aspect = gl.canvas.width / gl.canvas.height;
+    var zNear = 1;
+    var zFar = 2000;
+
+    var pMatrix = _glm.glm.m4.perspective(45, aspect, zNear, zFar);
+
+    _data.shaderProgram.setUniformMatrix4fv("u_PMatrix", pMatrix);
+
+    var cameraMatrix = _glm.glm.m4.yRotation(0);
+
+    cameraMatrix = _glm.glm.m4.translate(cameraMatrix, 0, 0, this.cameraDist * 1.5);
+
+    var viewMatrix = _glm.glm.m4.inverse(cameraMatrix);
+
+    viewMatrix = _glm.glm.m4.xRotate(viewMatrix, this.xRotate);
+    viewMatrix = _glm.glm.m4.yRotate(viewMatrix, this.yRotate);
+    viewMatrix = _glm.glm.m4.zRotate(viewMatrix, this.zRotate);
+
+    _data.shaderProgram.setUniformMatrix4fv("u_VMatrix", viewMatrix);
+
+    this.objects[4].setAngle(this.angle);
+
+    _data.shaderProgram.setUniformMatrix4fv("u_MMatrix", this.objects[4].getModelMatrix());
+
+    var MVMatrix = _glm.glm.m4.multiply(viewMatrix, this.objects[4].getModelMatrix());
+
+    var NMatrix = _glm.glm.transpose(_glm.glm.m4.inverse(MVMatrix));
+
+    _data.shaderProgram.setUniformMatrix4fv("u_NMatrix", NMatrix);
+
+    this.objects[4].draw();
+    requestAnimationFrame(this.draw.bind(this));
+  };
+
+  return Scene;
+}();
+
+var _default = Scene;
+exports.default = _default;
+},{"./glm":"glm.ts","./GL":"GL.ts","./Light":"Light.ts","./data":"data.ts"}],"data.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.dataInit = dataInit;
+exports.scene = exports.shaderProgram = void 0;
+
+var _ShaderProgram = _interopRequireDefault(require("./ShaderProgram"));
+
+var _GraphicObject = _interopRequireDefault(require("./GraphicObject"));
+
+var _Mesh = _interopRequireDefault(require("./Mesh"));
+
+var _Scene = _interopRequireDefault(require("./Scene"));
+
+var _GL = _interopRequireDefault(require("./GL"));
+
+var _glm = require("./glm");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var __awaiter = void 0 && (void 0).__awaiter || function (thisArg, _arguments, P, generator) {
+  function adopt(value) {
+    return value instanceof P ? value : new P(function (resolve) {
+      resolve(value);
+    });
+  }
+
+  return new (P || (P = Promise))(function (resolve, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+
+    function step(result) {
+      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+};
+
+var __generator = void 0 && (void 0).__generator || function (thisArg, body) {
+  var _ = {
+    label: 0,
+    sent: function sent() {
+      if (t[0] & 1) throw t[1];
+      return t[1];
+    },
+    trys: [],
+    ops: []
+  },
+      f,
+      y,
+      t,
+      g;
+  return g = {
+    next: verb(0),
+    "throw": verb(1),
+    "return": verb(2)
+  }, typeof Symbol === "function" && (g[Symbol.iterator] = function () {
+    return this;
+  }), g;
+
+  function verb(n) {
+    return function (v) {
+      return step([n, v]);
+    };
+  }
+
+  function step(op) {
+    if (f) throw new TypeError("Generator is already executing.");
+
+    while (_) {
+      try {
+        if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+        if (y = 0, t) op = [op[0] & 2, t.value];
+
+        switch (op[0]) {
+          case 0:
+          case 1:
+            t = op;
+            break;
+
+          case 4:
+            _.label++;
+            return {
+              value: op[1],
+              done: false
+            };
+
+          case 5:
+            _.label++;
+            y = op[1];
+            op = [0];
+            continue;
+
+          case 7:
+            op = _.ops.pop();
+
+            _.trys.pop();
+
+            continue;
+
+          default:
+            if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+              _ = 0;
+              continue;
+            }
+
+            if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
+              _.label = op[1];
+              break;
+            }
+
+            if (op[0] === 6 && _.label < t[1]) {
+              _.label = t[1];
+              t = op;
+              break;
+            }
+
+            if (t && _.label < t[2]) {
+              _.label = t[2];
+
+              _.ops.push(op);
+
+              break;
+            }
+
+            if (t[2]) _.ops.pop();
+
+            _.trys.pop();
+
+            continue;
+        }
+
+        op = body.call(thisArg, _);
+      } catch (e) {
+        op = [6, e];
+        y = 0;
+      } finally {
+        f = t = 0;
+      }
+    }
+
+    if (op[0] & 5) throw op[1];
+    return {
+      value: op[0] ? op[1] : void 0,
+      done: true
+    };
+  }
+};
+
+var shaderProgram;
+exports.shaderProgram = shaderProgram;
+var scene;
+exports.scene = scene;
+
+function dataInit() {
+  return __awaiter(this, void 0, void 0, function () {
+    var objects, planeMesh, plane;
+    return __generator(this, function (_a) {
+      switch (_a.label) {
+        case 0:
+          _GL.default.init("#scene");
+
+          exports.scene = scene = new _Scene.default();
+          exports.shaderProgram = shaderProgram = new _ShaderProgram.default();
+          shaderProgram.initShader("vertex", "#vertex-shader-2d");
+          shaderProgram.initShader("fragment", "#fragment-shader-2d");
+          shaderProgram.initShaderProgram();
+          shaderProgram.initUniform("u_MMatrix");
+          shaderProgram.initUniform("u_PMatrix");
+          shaderProgram.initUniform("u_NMatrix");
+          shaderProgram.initUniform("u_lightPosition");
+          shaderProgram.initUniform("u_ambientLightColor");
+          shaderProgram.initUniform("u_diffuseLightColor");
+          shaderProgram.initUniform("u_specularLightColor");
+          shaderProgram.initUniform("u_VMatrix");
+          shaderProgram.initAttr("a_vertexPosition");
+          shaderProgram.initAttr("a_vertexTextureCoords");
+          shaderProgram.initAttr("a_vertexNormal");
+          return [4, loadObjectsFromFile("objectList.json")];
+
+        case 1:
+          objects = _a.sent();
+          objects.forEach(function (object) {
+            scene.addObject(object);
+          });
+          planeMesh = new _Mesh.default();
+          return [4, planeMesh.load("simple_plane")];
+
+        case 2:
+          _a.sent();
+
+          plane = new _GraphicObject.default(planeMesh, 0);
+          scene.addObject(plane);
+          return [2];
+      }
+    });
+  });
+}
+
+function loadObjectsFromFile(filename) {
+  return __awaiter(this, void 0, Promise, function () {
+    var box, response;
+    return __generator(this, function (_a) {
+      switch (_a.label) {
+        case 0:
+          box = new _Mesh.default();
+          return [4, box.load("Box")];
+
+        case 1:
+          _a.sent();
+
+          return [4, fetch("http://127.0.0.1:8887/dist/assets/" + filename)];
+
+        case 2:
+          return [4, _a.sent().json()];
+
+        case 3:
+          response = _a.sent();
+          return [2, response.objects.map(function (object) {
+            return new _GraphicObject.default(box, 0, new _glm.glm.vec3(object.position[0], object.position[1], object.position[2]));
+          })];
+      }
+    });
+  });
+}
+},{"./ShaderProgram":"ShaderProgram.ts","./GraphicObject":"GraphicObject.ts","./Mesh":"Mesh.ts","./Scene":"Scene.ts","./GL":"GL.ts","./glm":"glm.ts"}],"main.ts":[function(require,module,exports) {
+"use strict";
+
+var _data = require("./data");
+
+var __awaiter = void 0 && (void 0).__awaiter || function (thisArg, _arguments, P, generator) {
+  function adopt(value) {
+    return value instanceof P ? value : new P(function (resolve) {
+      resolve(value);
+    });
+  }
+
+  return new (P || (P = Promise))(function (resolve, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+
+    function step(result) {
+      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+};
+
+var __generator = void 0 && (void 0).__generator || function (thisArg, body) {
+  var _ = {
+    label: 0,
+    sent: function sent() {
+      if (t[0] & 1) throw t[1];
+      return t[1];
+    },
+    trys: [],
+    ops: []
+  },
+      f,
+      y,
+      t,
+      g;
+  return g = {
+    next: verb(0),
+    "throw": verb(1),
+    "return": verb(2)
+  }, typeof Symbol === "function" && (g[Symbol.iterator] = function () {
+    return this;
+  }), g;
+
+  function verb(n) {
+    return function (v) {
+      return step([n, v]);
+    };
+  }
+
+  function step(op) {
+    if (f) throw new TypeError("Generator is already executing.");
+
+    while (_) {
+      try {
+        if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+        if (y = 0, t) op = [op[0] & 2, t.value];
+
+        switch (op[0]) {
+          case 0:
+          case 1:
+            t = op;
+            break;
+
+          case 4:
+            _.label++;
+            return {
+              value: op[1],
+              done: false
+            };
+
+          case 5:
+            _.label++;
+            y = op[1];
+            op = [0];
+            continue;
+
+          case 7:
+            op = _.ops.pop();
+
+            _.trys.pop();
+
+            continue;
+
+          default:
+            if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+              _ = 0;
+              continue;
+            }
+
+            if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
+              _.label = op[1];
+              break;
+            }
+
+            if (op[0] === 6 && _.label < t[1]) {
+              _.label = t[1];
+              t = op;
+              break;
+            }
+
+            if (t && _.label < t[2]) {
+              _.label = t[2];
+
+              _.ops.push(op);
+
+              break;
+            }
+
+            if (t[2]) _.ops.pop();
+
+            _.trys.pop();
+
+            continue;
+        }
+
+        op = body.call(thisArg, _);
+      } catch (e) {
+        op = [6, e];
+        y = 0;
+      } finally {
+        f = t = 0;
+      }
+    }
+
+    if (op[0] & 5) throw op[1];
+    return {
+      value: op[0] ? op[1] : void 0,
+      done: true
+    };
+  }
+};
+
+function main() {
+  return __awaiter(this, void 0, Promise, function () {
+    return __generator(this, function (_a) {
+      switch (_a.label) {
+        case 0:
+          return [4, (0, _data.dataInit)()];
+
+        case 1:
+          _a.sent();
+
+          requestAnimationFrame(_data.scene.draw.bind(_data.scene));
+          return [2];
+      }
+    });
+  });
+}
+
+main();
+},{"./data":"data.ts"}],"../../../../../../../Users/Redal/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -1431,7 +1789,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57421" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50226" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

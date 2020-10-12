@@ -136,7 +136,12 @@ class Mesh {
     }
   }
 
+  init = true;
   public draw() {
+    if (this.init) {
+      console.log(this.vertices);
+      this.init = false;
+    }
     const gl = GL.getGL();
     gl.bindBuffer(gl.ARRAY_BUFFER, this.arrayBuffer);
     gl.vertexAttribPointer(

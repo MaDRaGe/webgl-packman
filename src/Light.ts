@@ -75,11 +75,6 @@ class Light {
     shaderProgram.setUniform3fv("u_ambientLightColor", [this.ambient.x, this.ambient.y, this.ambient.z]);
     shaderProgram.setUniform3fv("u_diffuseLightColor", [this.diffuse.x, this.diffuse.y, this.diffuse.z]);
     shaderProgram.setUniform3fv("u_specularLightColor", [this.specular.x, this.specular.y, this.specular.z]);
-    /*
-    GL.setUniform3fv("u_lightPosition", [0.0, 10.0, 5.0]);
-    GL.setUniform3fv("u_ambientLightColor", [0.1, 0.1, 0.1]);
-    GL.setUniform3fv("u_diffuseLightColor", [0.7, 0.7, 0.7]);
-    GL.setUniform3fv("u_specularLightColor", [1.0, 1.0, 1.0]);*/
   }
 }
 export default Light;

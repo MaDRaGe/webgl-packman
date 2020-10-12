@@ -1,7 +1,5 @@
 import Camera from "./Camera";
 import Light from "./Light";
-import Shader from "./Shader";
-import ShaderProgram from "./ShaderProgram";
 
 type ShaderArray = {
   vertex: WebGLShader;
