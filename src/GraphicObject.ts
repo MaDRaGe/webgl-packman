@@ -12,16 +12,19 @@ class GraphicObject {
     this.angle = angle;
     this.position = position;
     this.modelMatrix = new Array(16).fill(0);
+    this.modelMatrix[0] = 1;
+    this.modelMatrix[5] = 1;
+    this.modelMatrix[10] = 1;
+    this.modelMatrix[15] = 1;
     this.calcModelMatrix();
   }
 
   public draw(): void {
-    this.mesh?.draw;
+    this.mesh?.draw();
   }
 
   public setMesh(mesh: Mesh): void {
     this.mesh = mesh;
-    this.calcModelMatrix();
   }
 
   public getMesh(): Mesh | null {
@@ -56,6 +59,10 @@ class GraphicObject {
     this.modelMatrix[12] = this.position.x;
     this.modelMatrix[13] = this.position.y;
     this.modelMatrix[14] = this.position.z;
+  }
+
+  public getModelMatrix(): number[] {
+    return this.modelMatrix;
   }
 }
 

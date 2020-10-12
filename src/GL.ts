@@ -15,35 +15,35 @@ class GL {
   private gl: WebGLRenderingContext = <WebGLRenderingContext>
     document.createElement("canvas").getContext("webgl");
   
-  private shaderProgram: ShaderProgram = new ShaderProgram(this.gl);
+  //private shaderProgram: ShaderProgram = new ShaderProgram();
 
   public init(canvasDOMSelector: string): void {
     const scene = <HTMLCanvasElement>document.querySelector(canvasDOMSelector);
     if (scene) {
       this.gl = <WebGLRenderingContext>scene.getContext("webgl") 
         || scene.getContext("experimental-webgl");
-      this.shaderProgram = new ShaderProgram(this.gl);
+      //this.shaderProgram = new ShaderProgram();
     }
   }
-
+/*
   public setShaderProgram(shaderProgram: ShaderProgram): void {
     this.shaderProgram = shaderProgram;
   }
 
   public setUniform3fv(uniformName: string, value: number[]): void {
-    this.shaderProgram.setUniform3fv(this.gl, uniformName, value);
+    this.shaderProgram.setUniform3fv(uniformName, value);
   }
 
   public setUniformMatrix4fv(uniformName: string, value: number[]): void {
-    this.shaderProgram.setUniformMatrix4fv(this.gl, uniformName, value);
-  }
-
-  public getGL(): WebGLRenderingContext {
-    return this.gl;
+    this.shaderProgram.setUniformMatrix4fv(uniformName, value);
   }
 
   public getVertexAttr(name: string): number {
     return this.shaderProgram.getVertexAttr(name);
+  }*/
+
+  public getGL(): WebGLRenderingContext {
+    return this.gl;
   }
 }
 

@@ -1,5 +1,6 @@
 import { glm } from "./glm";
 import GL from "./GL";
+import { shaderProgram } from "./data";
 
 class Vertex {
   public coord: glm.vec3;
@@ -38,7 +39,7 @@ class Mesh {
 
   constructor() {}
 
-  public async load(name: String, gl: WebGLRenderingContext): Promise<void> {
+  public async load(name: String): Promise<void> {
     try {
       const response = await fetch(
         `http://127.0.0.1:8887/dist/assets/meshes/${name}.obj`
@@ -46,6 +47,7 @@ class Mesh {
       const text = await response.text();
       this.parseAttributes(text);
 
+      const gl = GL.getGL();
       this.arrayBuffer = <WebGLBuffer>gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, this.arrayBuffer);
       gl.bufferData(
@@ -134,19 +136,11 @@ class Mesh {
     }
   }
 
-
-  init = true;
   public draw() {
-    if (this.init) {
-      console.log(this.vertices);
-      console.log(this.indices);
-      console.log(this.vertexToIndex);
-      this.init = false;
-    }
     const gl = GL.getGL();
     gl.bindBuffer(gl.ARRAY_BUFFER, this.arrayBuffer);
     gl.vertexAttribPointer(
-      GL.getVertexAttr("a_vertexPosition"),
+      shaderProgram.getVertexAttr("a_vertexPosition"),
       3,
       gl.FLOAT,
       false,
@@ -155,7 +149,7 @@ class Mesh {
     );
     gl.bindBuffer(gl.ARRAY_BUFFER, this.normalCoordBuffer);
     gl.vertexAttribPointer(
-      GL.getVertexAttr("a_vertexNormal"),
+      shaderProgram.getVertexAttr("a_vertexNormal"),
       3,
       gl.FLOAT,
       false,
@@ -164,7 +158,7 @@ class Mesh {
     );
     gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer);
     gl.vertexAttribPointer(
-      GL.getVertexAttr("a_vertexTextureCoords"),
+      shaderProgram.getVertexAttr("a_vertexTextureCoords"),
       2,
       gl.FLOAT,
       false,

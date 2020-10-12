@@ -1,5 +1,6 @@
 import { glm } from "./glm";
 import GL from "./GL";
+import { shaderProgram } from "./data";
 
 type LightSettings = {
   position: glm.vec3,
@@ -17,10 +18,10 @@ class Light {
   private shininess: number = 0;
 
   constructor(
-    position: glm.vec3 = new glm.vec3(0, 0, 0),
-    ambient: glm.vec3 = new glm.vec3(0, 0, 0),
-    diffuse: glm.vec3 = new glm.vec3(0, 0, 0),
-    specular: glm.vec3 = new glm.vec3(0, 0, 0),
+    position: glm.vec3 = new glm.vec3(0.0, 10.0, 5.0),
+    ambient: glm.vec3 = new glm.vec3(0.1, 0.1, 0.1),
+    diffuse: glm.vec3 = new glm.vec3(0.7, 0.7, 0.7),
+    specular: glm.vec3 = new glm.vec3(1.0, 1.0, 1.0),
     shininess: number = 0
   ) {
     this.position = position;
@@ -70,10 +71,15 @@ class Light {
   }
 
   public apply() {
+    shaderProgram.setUniform3fv("u_lightPosition", [this.position.x, this.position.y, this.position.z]);
+    shaderProgram.setUniform3fv("u_ambientLightColor", [this.ambient.x, this.ambient.y, this.ambient.z]);
+    shaderProgram.setUniform3fv("u_diffuseLightColor", [this.diffuse.x, this.diffuse.y, this.diffuse.z]);
+    shaderProgram.setUniform3fv("u_specularLightColor", [this.specular.x, this.specular.y, this.specular.z]);
+    /*
     GL.setUniform3fv("u_lightPosition", [0.0, 10.0, 5.0]);
     GL.setUniform3fv("u_ambientLightColor", [0.1, 0.1, 0.1]);
     GL.setUniform3fv("u_diffuseLightColor", [0.7, 0.7, 0.7]);
-    GL.setUniform3fv("u_specularLightColor", [1.0, 1.0, 1.0]);
+    GL.setUniform3fv("u_specularLightColor", [1.0, 1.0, 1.0]);*/
   }
 }
 export default Light;

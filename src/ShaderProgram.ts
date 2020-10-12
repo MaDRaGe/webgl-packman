@@ -1,3 +1,5 @@
+import GL from "./GL";
+
 type ShaderArray = {
   vertex: WebGLShader;
   fragment: WebGLShader;
@@ -8,7 +10,8 @@ class ShaderProgram {
   private uniforms: Map<string, WebGLUniformLocation> = new Map();
   private attributes: Map<string, number> = new Map();
 
-  constructor(gl: WebGLRenderingContext) {
+  constructor() {
+    const gl = GL.getGL();
     this.shaderProgram = <WebGLProgram>gl.createProgram();
     this.shaders = {
       vertex: <WebGLShader>gl.createShader(gl.VERTEX_SHADER),
@@ -24,7 +27,8 @@ class ShaderProgram {
     @return true - if the shader was initialized successefuly
             false - otherwise
   */
-  public initShader(gl: WebGLRenderingContext, type: "vertex" | "fragment", sourceDom: String): Boolean {
+  public initShader(type: "vertex" | "fragment", sourceDom: String): Boolean {
+    const gl = GL.getGL();
     if (type === "vertex") {
       this.shaders[type] = <WebGLShader>(
         gl?.createShader(gl.VERTEX_SHADER)
@@ -48,7 +52,8 @@ class ShaderProgram {
     return false;
   }
 
-  public initShaderProgram(gl: WebGLRenderingContext): Boolean {
+  public initShaderProgram(): Boolean {
+    const gl = GL.getGL();
     this.shaderProgram = <WebGLProgram>gl.createProgram();
     gl.attachShader(this.shaderProgram, this.shaders.vertex);
     gl.attachShader(this.shaderProgram, this.shaders.fragment);
@@ -61,14 +66,16 @@ class ShaderProgram {
     return false;
   }
 
-  public initUniform(gl: WebGLRenderingContext, name: string): void {
+  public initUniform(name: string): void {
+    const gl = GL.getGL();
     if (!this.uniforms.has(name)) {
       const uniform = <WebGLUniformLocation>gl.getUniformLocation(this.shaderProgram, name);
       this.uniforms.set(name, uniform);
     }
   }
 
-  public initAttr(gl: WebGLRenderingContext, name: string): void {
+  public initAttr(name: string): void {
+    const gl = GL.getGL();
     if (!this.attributes.has(name)) {
       const attribute = <number>gl.getAttribLocation(this.shaderProgram, name);
       gl.enableVertexAttribArray(attribute);
@@ -76,15 +83,18 @@ class ShaderProgram {
     }
   }
 
-  public setUniform3fv(gl: WebGLRenderingContext, name: string, value: number[]): void {
+  public setUniform3fv(name: string, value: number[]): void {
+    const gl = GL.getGL();
     gl.uniform3fv(<WebGLUniformLocation>this.uniforms.get(name), value);
   }
 
-  public setUniformMatrix4fv(gl: WebGLRenderingContext, name: string, value: number[]): void {
+  public setUniformMatrix4fv(name: string, value: number[]): void {
+    const gl = GL.getGL();
     gl.uniformMatrix4fv(<WebGLUniformLocation>this.uniforms.get(name), false, value);
   }
 
-  public apply(gl: WebGLRenderingContext): void {
+  public apply(): void {
+    const gl = GL.getGL();
     gl.useProgram(this.shaderProgram);
   }
 
