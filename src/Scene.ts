@@ -4,6 +4,7 @@ import { glm } from "./glm";
 import GL from "./GL";
 import Light from "./Light";
 import { shaderProgram } from "./data";
+import Camera from "./Camera";
 
 type ShaderArray = {
   vertex: WebGLShader;
@@ -18,6 +19,7 @@ class Scene {
   private yRotate: number = 0;
   private zRotate: number = 0;
   private light: Light = new Light();
+  private camera: Camera = new Camera();
 
   /*
     Constructor
@@ -38,6 +40,24 @@ class Scene {
     document.querySelector("#zRotate")?.addEventListener("input", (event) => {
       this.zRotate = <number><unknown>(<HTMLInputElement>event.target).value;
     });
+    document.addEventListener("keydown", (event) => {
+      event.preventDefault();
+      switch (event.code) {
+        case "Space":
+          this.camera.zoom(1);
+          break;
+        case "KeyD":
+          this.camera.rotateHoriz(-5);
+          break;
+        case "KeyA":
+          this.camera.rotateHoriz(5);
+          break;
+      }
+    })
+  }
+
+  public simulate() {
+
   }
 
   public addMesh(mesh: Mesh): void {
@@ -59,44 +79,44 @@ class Scene {
     gl.enable(gl.DEPTH_TEST);
     this.light.apply();
     // gluPerspective
-    const aspect = gl.canvas.width / gl.canvas.height;
-    const zNear = 1;
-    const zFar = 2000;
-    let pMatrix = glm.m4.perspective(45, aspect, zNear, zFar);
-    shaderProgram.setUniformMatrix4fv("u_PMatrix", pMatrix);
+    this.camera.setProjectionMatrix(45, gl.canvas.width / gl.canvas.height, 1, 2000);
+    shaderProgram.setUniformMatrix4fv("u_PMatrix", this.camera.getProjectionMatrix());
 
     // View matrix
-    let cameraMatrix = glm.m4.yRotation(0);
+    /*let cameraMatrix = glm.m4.yRotation(0);
     cameraMatrix = glm.m4.translate(cameraMatrix, 0, 0, this.cameraDist * 1.5);
     let viewMatrix = glm.m4.inverse(cameraMatrix);
     viewMatrix = glm.m4.xRotate(viewMatrix, this.xRotate);
     viewMatrix = glm.m4.yRotate(viewMatrix, this.yRotate);
-    viewMatrix = glm.m4.zRotate(viewMatrix, this.zRotate);
-    shaderProgram.setUniformMatrix4fv("u_VMatrix", viewMatrix);
+    viewMatrix = glm.m4.zRotate(viewMatrix, this.zRotate);*/
+    shaderProgram.setUniformMatrix4fv("u_VMatrix", this.camera.getViewMatrix());
 
-    this.objects[4].setAngle(this.angle);
     shaderProgram.setUniformMatrix4fv("u_MMatrix", this.objects[4].getModelMatrix());
 
-    let MVMatrix = glm.m4.multiply(viewMatrix, this.objects[4].getModelMatrix())
+    let MVMatrix = glm.m4.multiply(this.camera.getViewMatrix(), this.objects[4].getModelMatrix())
     let NMatrix = glm.transpose(glm.m4.inverse(MVMatrix));
     shaderProgram.setUniformMatrix4fv("u_NMatrix", NMatrix);
 
     // Draw objects
-    this.objects[4].draw();
-    /*this.objects.forEach((object: GraphicObject) => {
+    this.objects.forEach((object: GraphicObject, index: number) => {
       // Move object
-      object.setAngle(this.angle);
+      if (index === 0) {
+        object.setAngle(this.angle);
+      }
+      
       shaderProgram.setUniformMatrix4fv("u_MMatrix", object.getModelMatrix());
 
-      let MVMatrix = glm.m4.multiply(viewMatrix, object.getModelMatrix())
+      let MVMatrix = glm.m4.multiply(this.camera.getViewMatrix(), object.getModelMatrix())
       let NMatrix = glm.transpose(glm.m4.inverse(MVMatrix));
       shaderProgram.setUniformMatrix4fv("u_NMatrix", NMatrix);
 
-      // Draw objects
+      // Draw object
       object.draw();
-    })*/
+    })
 
-    requestAnimationFrame(this.draw.bind(this));
+    this.angle += 0.1;
+
+    //requestAnimationFrame(this.draw.bind(this));
   }
 }
 
