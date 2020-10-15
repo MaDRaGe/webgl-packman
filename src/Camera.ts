@@ -2,10 +2,10 @@ import { glm } from "./glm";
 import gl from "./GL";
 
 class Camera {
-  private position: glm.vec3 = new glm.vec3(10, 10, 10);
-  private horizRotateAngle: number = 45;
+  private position: glm.vec3 = new glm.vec3(0, 0, 0);
+  private horizRotateAngle: number = -90;
   private vertRotateAngle: number = 45;
-  private distanceToCenter: number = 10;
+  private distanceToCenter: number = 20;
   private projectionMatrix: number[] = [];
 
   constructor() {
@@ -22,6 +22,7 @@ class Camera {
   }
 
   public getViewMatrix(): number[] {
+    console.log(this.position)
     return glm.m4.inverse(glm.lookAt(this.position, new glm.vec3(0, 0, 0), new glm.vec3(0, 1, 0)));
   }
 

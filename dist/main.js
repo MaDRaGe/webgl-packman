@@ -1238,10 +1238,10 @@ var _glm = require("./glm");
 
 var Camera = function () {
   function Camera() {
-    this.position = new _glm.glm.vec3(10, 10, 10);
-    this.horizRotateAngle = 45;
+    this.position = new _glm.glm.vec3(0, 0, 0);
+    this.horizRotateAngle = -90;
     this.vertRotateAngle = 45;
-    this.distanceToCenter = 10;
+    this.distanceToCenter = 20;
     this.projectionMatrix = [];
     this.calcPosition();
   }
@@ -1255,6 +1255,7 @@ var Camera = function () {
   };
 
   Camera.prototype.getViewMatrix = function () {
+    console.log(this.position);
     return _glm.glm.m4.inverse(_glm.glm.lookAt(this.position, new _glm.glm.vec3(0, 0, 0), new _glm.glm.vec3(0, 1, 0)));
   };
 
@@ -1333,6 +1334,7 @@ var Scene = function () {
     this.zRotate = 0;
     this.light = new _Light.default();
     this.camera = new _Camera.default();
+    this.keysPressed = {};
     this.angle = 0.1;
     this.init = true;
     this.cameraDist = document.querySelector("#cameraDist").value;
@@ -1350,23 +1352,28 @@ var Scene = function () {
     });
     document.addEventListener("keydown", function (event) {
       event.preventDefault();
+      _this.keysPressed[event.code] = true;
 
-      switch (event.code) {
-        case "Space":
+      if (_this.keysPressed["Space"]) {
+        setTimeout(function () {
           _this.camera.zoom(1);
-
-          break;
-
-        case "KeyD":
-          _this.camera.rotateHoriz(-5);
-
-          break;
-
-        case "KeyA":
-          _this.camera.rotateHoriz(5);
-
-          break;
+        }, 10);
       }
+
+      if (_this.keysPressed["KeyD"]) {
+        setTimeout(function () {
+          _this.camera.rotateHoriz(-5);
+        }, 10);
+      }
+
+      if (_this.keysPressed["KeyA"]) {
+        setTimeout(function () {
+          _this.camera.rotateHoriz(5);
+        }, 10);
+      }
+    });
+    document.addEventListener("keyup", function (event) {
+      delete _this.keysPressed[event.code];
     });
   }
 
@@ -1397,19 +1404,7 @@ var Scene = function () {
 
     _data.shaderProgram.setUniformMatrix4fv("u_VMatrix", this.camera.getViewMatrix());
 
-    _data.shaderProgram.setUniformMatrix4fv("u_MMatrix", this.objects[4].getModelMatrix());
-
-    var MVMatrix = _glm.glm.m4.multiply(this.camera.getViewMatrix(), this.objects[4].getModelMatrix());
-
-    var NMatrix = _glm.glm.transpose(_glm.glm.m4.inverse(MVMatrix));
-
-    _data.shaderProgram.setUniformMatrix4fv("u_NMatrix", NMatrix);
-
     this.objects.forEach(function (object, index) {
-      if (index === 0) {
-        object.setAngle(_this.angle);
-      }
-
       _data.shaderProgram.setUniformMatrix4fv("u_MMatrix", object.getModelMatrix());
 
       var MVMatrix = _glm.glm.m4.multiply(_this.camera.getViewMatrix(), object.getModelMatrix());
@@ -1435,7 +1430,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.dataInit = dataInit;
-exports.scene = exports.shaderProgram = void 0;
+exports.scene = exports.shaderProgram = exports.map = exports.ObjectTypes = void 0;
 
 var _ShaderProgram = _interopRequireDefault(require("./ShaderProgram"));
 
@@ -1594,6 +1589,17 @@ var __generator = void 0 && (void 0).__generator || function (thisArg, body) {
   }
 };
 
+var ObjectTypes;
+exports.ObjectTypes = ObjectTypes;
+
+(function (ObjectTypes) {
+  ObjectTypes[ObjectTypes["Space"] = 0] = "Space";
+  ObjectTypes[ObjectTypes["Border"] = 1] = "Border";
+  ObjectTypes[ObjectTypes["LightBorder"] = 2] = "LightBorder";
+})(ObjectTypes || (exports.ObjectTypes = ObjectTypes = {}));
+
+var map = [[ObjectTypes.Border, ObjectTypes.Border, ObjectTypes.Border, ObjectTypes.Border, ObjectTypes.Border], [ObjectTypes.Border, ObjectTypes.Border, ObjectTypes.Border, ObjectTypes.Border, ObjectTypes.Border], [ObjectTypes.Border, ObjectTypes.Border, ObjectTypes.Space, ObjectTypes.Border, ObjectTypes.Border], [ObjectTypes.Border, ObjectTypes.Border, ObjectTypes.Space, ObjectTypes.Border, ObjectTypes.Border], [ObjectTypes.Border, ObjectTypes.Border, ObjectTypes.Space, ObjectTypes.Border, ObjectTypes.Border]];
+exports.map = map;
 var shaderProgram;
 exports.shaderProgram = shaderProgram;
 var scene;
@@ -1601,52 +1607,34 @@ exports.scene = scene;
 
 function dataInit() {
   return __awaiter(this, void 0, void 0, function () {
-    var objects, planeMesh, plane;
     return __generator(this, function (_a) {
-      switch (_a.label) {
-        case 0:
-          _GL.default.init("#scene");
+      _GL.default.init("#scene");
 
-          exports.scene = scene = new _Scene.default();
-          exports.shaderProgram = shaderProgram = new _ShaderProgram.default();
-          shaderProgram.initShader("vertex", "#vertex-shader-2d");
-          shaderProgram.initShader("fragment", "#fragment-shader-2d");
-          shaderProgram.initShaderProgram();
-          shaderProgram.initUniform("u_MMatrix");
-          shaderProgram.initUniform("u_PMatrix");
-          shaderProgram.initUniform("u_NMatrix");
-          shaderProgram.initUniform("u_lightPosition");
-          shaderProgram.initUniform("u_ambientLightColor");
-          shaderProgram.initUniform("u_diffuseLightColor");
-          shaderProgram.initUniform("u_specularLightColor");
-          shaderProgram.initUniform("u_VMatrix");
-          shaderProgram.initAttr("a_vertexPosition");
-          shaderProgram.initAttr("a_vertexTextureCoords");
-          shaderProgram.initAttr("a_vertexNormal");
-          return [4, loadObjectsFromFile("objectList.json")];
-
-        case 1:
-          objects = _a.sent();
-          objects.forEach(function (object) {
-            scene.addObject(object);
-          });
-          planeMesh = new _Mesh.default();
-          return [4, planeMesh.load("simple_plane")];
-
-        case 2:
-          _a.sent();
-
-          plane = new _GraphicObject.default(planeMesh, 0);
-          scene.addObject(plane);
-          return [2];
-      }
+      exports.scene = scene = new _Scene.default();
+      exports.shaderProgram = shaderProgram = new _ShaderProgram.default();
+      shaderProgram.initShader("vertex", "#vertex-shader-2d");
+      shaderProgram.initShader("fragment", "#fragment-shader-2d");
+      shaderProgram.initShaderProgram();
+      shaderProgram.initUniform("u_MMatrix");
+      shaderProgram.initUniform("u_PMatrix");
+      shaderProgram.initUniform("u_NMatrix");
+      shaderProgram.initUniform("u_lightPosition");
+      shaderProgram.initUniform("u_ambientLightColor");
+      shaderProgram.initUniform("u_diffuseLightColor");
+      shaderProgram.initUniform("u_specularLightColor");
+      shaderProgram.initUniform("u_VMatrix");
+      shaderProgram.initAttr("a_vertexPosition");
+      shaderProgram.initAttr("a_vertexTextureCoords");
+      shaderProgram.initAttr("a_vertexNormal");
+      loadObjects();
+      return [2];
     });
   });
 }
 
-function loadObjectsFromFile(filename) {
-  return __awaiter(this, void 0, Promise, function () {
-    var box, response;
+function loadObjects() {
+  return __awaiter(this, void 0, void 0, function () {
+    var box;
     return __generator(this, function (_a) {
       switch (_a.label) {
         case 0:
@@ -1656,16 +1644,16 @@ function loadObjectsFromFile(filename) {
         case 1:
           _a.sent();
 
-          return [4, fetch("http://127.0.0.1:8887/dist/assets/" + filename)];
-
-        case 2:
-          return [4, _a.sent().json()];
-
-        case 3:
-          response = _a.sent();
-          return [2, response.objects.map(function (object) {
-            return new _GraphicObject.default(box, 0, new _glm.glm.vec3(object.position[0], object.position[1], object.position[2]));
-          })];
+          map.forEach(function (row, rowIndex) {
+            row.forEach(function (objectTypeNumber, columnIndex) {
+              switch (objectTypeNumber) {
+                case ObjectTypes.Border:
+                  scene.addObject(new _GraphicObject.default(box, 0, new _glm.glm.vec3(columnIndex, -rowIndex, 0)));
+                  break;
+              }
+            });
+          });
+          return [2];
       }
     });
   });
@@ -1908,7 +1896,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55387" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62824" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -1,7 +1,8 @@
 {
   "objects": [
     {
-      "position": [1, 0, 0]
+      "position": [1, 0, 0],
+      "mesh": "Box"
     },
     {
       "position": [-1, 0, 0]

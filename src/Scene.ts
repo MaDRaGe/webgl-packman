@@ -20,6 +20,7 @@ class Scene {
   private zRotate: number = 0;
   private light: Light = new Light();
   private camera: Camera = new Camera();
+  private keysPressed: { [key: string]: boolean } = {};
 
   /*
     Constructor
@@ -42,17 +43,25 @@ class Scene {
     });
     document.addEventListener("keydown", (event) => {
       event.preventDefault();
-      switch (event.code) {
-        case "Space":
+      this.keysPressed[event.code] = true;
+      if (this.keysPressed["Space"]) {
+        setTimeout(() => {
           this.camera.zoom(1);
-          break;
-        case "KeyD":
-          this.camera.rotateHoriz(-5);
-          break;
-        case "KeyA":
-          this.camera.rotateHoriz(5);
-          break;
+        }, 10);
       }
+      if (this.keysPressed["KeyD"]) {
+        setTimeout(() => {
+          this.camera.rotateHoriz(-5);
+        }, 10)
+      }
+      if (this.keysPressed["KeyA"]) {
+        setTimeout(() => {
+          this.camera.rotateHoriz(5);
+        }, 10)
+      }
+    })
+    document.addEventListener("keyup", (event) => {
+      delete this.keysPressed[event.code];
     })
   }
 
@@ -83,27 +92,17 @@ class Scene {
     shaderProgram.setUniformMatrix4fv("u_PMatrix", this.camera.getProjectionMatrix());
 
     // View matrix
-    /*let cameraMatrix = glm.m4.yRotation(0);
-    cameraMatrix = glm.m4.translate(cameraMatrix, 0, 0, this.cameraDist * 1.5);
-    let viewMatrix = glm.m4.inverse(cameraMatrix);
-    viewMatrix = glm.m4.xRotate(viewMatrix, this.xRotate);
-    viewMatrix = glm.m4.yRotate(viewMatrix, this.yRotate);
-    viewMatrix = glm.m4.zRotate(viewMatrix, this.zRotate);*/
     shaderProgram.setUniformMatrix4fv("u_VMatrix", this.camera.getViewMatrix());
 
+    /*
     shaderProgram.setUniformMatrix4fv("u_MMatrix", this.objects[4].getModelMatrix());
 
     let MVMatrix = glm.m4.multiply(this.camera.getViewMatrix(), this.objects[4].getModelMatrix())
     let NMatrix = glm.transpose(glm.m4.inverse(MVMatrix));
-    shaderProgram.setUniformMatrix4fv("u_NMatrix", NMatrix);
+    shaderProgram.setUniformMatrix4fv("u_NMatrix", NMatrix);*/
 
     // Draw objects
-    this.objects.forEach((object: GraphicObject, index: number) => {
-      // Move object
-      if (index === 0) {
-        object.setAngle(this.angle);
-      }
-      
+    this.objects.forEach((object: GraphicObject, index: number) => {    
       shaderProgram.setUniformMatrix4fv("u_MMatrix", object.getModelMatrix());
 
       let MVMatrix = glm.m4.multiply(this.camera.getViewMatrix(), object.getModelMatrix())
