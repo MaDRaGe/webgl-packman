@@ -22,7 +22,6 @@ class Camera {
   }
 
   public getViewMatrix(): number[] {
-    console.log(this.position)
     return glm.m4.inverse(glm.lookAt(this.position, new glm.vec3(0, 0, 0), new glm.vec3(0, 1, 0)));
   }
 

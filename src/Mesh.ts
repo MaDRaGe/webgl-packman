@@ -42,7 +42,7 @@ class Mesh {
   public async load(name: String): Promise<void> {
     try {
       const response = await fetch(
-        `http://127.0.0.1:8887/dist/assets/meshes/${name}.obj`
+        `http://127.0.0.1:8887/assets/meshes/${name}.obj`
       );
       const text = await response.text();
       this.parseAttributes(text);
