@@ -16,7 +16,6 @@ class Vertex {
 
 class Mesh {
   // @ts-ignore
-
   private vertices: Vertex[] = [];
 
   // @ts-ignore
@@ -139,7 +138,6 @@ class Mesh {
   init = true;
   public draw() {
     if (this.init) {
-      console.log(this.vertices);
       this.init = false;
     }
     const gl = GL.getGL();

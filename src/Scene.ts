@@ -3,21 +3,13 @@ import Mesh from "./Mesh";
 import { glm } from "./glm";
 import GL from "./GL";
 import Light from "./Light";
-import { shaderProgram } from "./data";
+import { shaderProgram, gameObjects } from "./data";
 import Camera from "./Camera";
-
-type ShaderArray = {
-  vertex: WebGLShader;
-  fragment: WebGLShader;
-};
+import GameObject from "./GameObject";
 
 class Scene {
   private objects: GraphicObject[] = [];
   private meshes: Mesh[] = [];
-  private cameraDist: number = 0;
-  private xRotate: number = 0;
-  private yRotate: number = 0;
-  private zRotate: number = 0;
   private light: Light = new Light();
   private camera: Camera = new Camera();
   private keysPressed: { [key: string]: boolean } = {};
@@ -28,19 +20,6 @@ class Scene {
     @param domSelector - determines a selector of the canvas
   */
   constructor() {
-    this.cameraDist = <number><unknown>(<HTMLInputElement>document.querySelector("#cameraDist")).value
-    document.querySelector("#cameraDist")?.addEventListener("input", (event) => {
-      this.cameraDist = <number><unknown>(<HTMLInputElement>event.target).value;
-    });
-    document.querySelector("#xRotate")?.addEventListener("input", (event) => {
-      this.xRotate = <number><unknown>(<HTMLInputElement>event.target).value;
-    });
-    document.querySelector("#yRotate")?.addEventListener("input", (event) => {
-      this.yRotate = <number><unknown>(<HTMLInputElement>event.target).value;
-    });
-    document.querySelector("#zRotate")?.addEventListener("input", (event) => {
-      this.zRotate = <number><unknown>(<HTMLInputElement>event.target).value;
-    });
     document.addEventListener("keydown", (event) => {
       event.preventDefault();
       this.keysPressed[event.code] = true;
@@ -94,28 +73,19 @@ class Scene {
     // View matrix
     shaderProgram.setUniformMatrix4fv("u_VMatrix", this.camera.getViewMatrix());
 
-    /*
-    shaderProgram.setUniformMatrix4fv("u_MMatrix", this.objects[4].getModelMatrix());
-
-    let MVMatrix = glm.m4.multiply(this.camera.getViewMatrix(), this.objects[4].getModelMatrix())
-    let NMatrix = glm.transpose(glm.m4.inverse(MVMatrix));
-    shaderProgram.setUniformMatrix4fv("u_NMatrix", NMatrix);*/
-
     // Draw objects
-    this.objects.forEach((object: GraphicObject, index: number) => {    
-      shaderProgram.setUniformMatrix4fv("u_MMatrix", object.getModelMatrix());
+    gameObjects.forEach((gameObject: GameObject) => {
+      shaderProgram.setUniformMatrix4fv("u_MMatrix", gameObject.getModelMatrix());
 
-      let MVMatrix = glm.m4.multiply(this.camera.getViewMatrix(), object.getModelMatrix())
+      let MVMatrix = glm.m4.multiply(this.camera.getViewMatrix(), gameObject.getModelMatrix())
       let NMatrix = glm.transpose(glm.m4.inverse(MVMatrix));
       shaderProgram.setUniformMatrix4fv("u_NMatrix", NMatrix);
 
       // Draw object
-      object.draw();
+      gameObject.draw();
     })
 
     this.angle += 0.1;
-
-    //requestAnimationFrame(this.draw.bind(this));
   }
 }
 

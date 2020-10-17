@@ -7,10 +7,20 @@ class GameObject {
 
   public setPosition(position: glm.vec2): void {
     this.position = position;
+    this.graphicObject.setPosition(new glm.vec3(position.x, 0, position.y))
   }
 
   public setGraphicObject(graphicObject: GraphicObject): void {
     this.graphicObject = graphicObject;
+  }
+
+  public draw(): void {
+    this.graphicObject.setPosition(new glm.vec3(this.position.x, 0, this.position.y));
+    this.graphicObject.draw();
+  }
+
+  public getModelMatrix(): number[] {
+    return this.graphicObject.getModelMatrix();
   }
 }
 

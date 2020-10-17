@@ -1,14 +1,5 @@
 import { glm } from "./glm";
-import GL from "./GL";
 import { shaderProgram } from "./data";
-
-type LightSettings = {
-  position: glm.vec3,
-  ambient: glm.vec3,
-  diffuse: glm.vec3,
-  specular: glm.vec3,
-  shininess: number,
-}
 
 class Light {
   private position: glm.vec3 = new glm.vec3(0, 0, 0);

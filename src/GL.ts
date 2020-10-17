@@ -1,8 +1,3 @@
-type ShaderArray = {
-  vertex: WebGLShader;
-  fragment: WebGLShader;
-};
-
 class GL {
   private simulationFunc: Function = () => {};
   private displayFunc: Function = () => {};

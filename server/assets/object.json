@@ -1,0 +1,42 @@
+{
+  "plane": {
+    "mesh": {
+      "name": "simple_plane"
+    }
+  },
+  "light": {
+    "mesh": {
+      "name": "HighPolyBox"
+    }
+  },
+  "heavy": {
+    "mesh": {
+      "name": "HighPolyBox"
+    }
+  },
+  "border": {
+    "mesh": {
+      "name": "HighPolyBox"
+    }
+  },
+  "player": {
+    "mesh": {
+      "name": "Sphere"
+    }
+  },
+  "bomb": {
+    "mesh": {
+      "name": "Sphere"
+    }
+  },
+  "monster": {
+    "mesh": {
+      "name": "Sphere"
+    }
+  },
+  "portal_1": {
+    "mesh": {
+      "name": "PortalBox"
+    }
+  }
+}

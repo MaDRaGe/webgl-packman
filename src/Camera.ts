@@ -1,9 +1,8 @@
 import { glm } from "./glm";
-import gl from "./GL";
 
 class Camera {
   private position: glm.vec3 = new glm.vec3(0, 0, 0);
-  private horizRotateAngle: number = -90;
+  private horizRotateAngle: number = 0;
   private vertRotateAngle: number = 45;
   private distanceToCenter: number = 20;
   private projectionMatrix: number[] = [];
