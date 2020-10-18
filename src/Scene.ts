@@ -3,7 +3,7 @@ import Mesh from "./Mesh";
 import { glm } from "./glm";
 import GL from "./GL";
 import Light from "./Light";
-import { shaderProgram, gameObjects } from "./data";
+import { shaderProgram, gameObjects, Player } from "./data";
 import Camera from "./Camera";
 import GameObject from "./GameObject";
 
@@ -12,37 +12,13 @@ class Scene {
   private meshes: Mesh[] = [];
   private light: Light = new Light();
   private camera: Camera = new Camera();
-  private keysPressed: { [key: string]: boolean } = {};
 
   /*
     Constructor
 
     @param domSelector - determines a selector of the canvas
   */
-  constructor() {
-    document.addEventListener("keydown", (event) => {
-      event.preventDefault();
-      this.keysPressed[event.code] = true;
-      if (this.keysPressed["Space"]) {
-        setTimeout(() => {
-          this.camera.zoom(1);
-        }, 10);
-      }
-      if (this.keysPressed["KeyD"]) {
-        setTimeout(() => {
-          this.camera.rotateHoriz(-5);
-        }, 10)
-      }
-      if (this.keysPressed["KeyA"]) {
-        setTimeout(() => {
-          this.camera.rotateHoriz(5);
-        }, 10)
-      }
-    })
-    document.addEventListener("keyup", (event) => {
-      delete this.keysPressed[event.code];
-    })
-  }
+  constructor() {}
 
   public simulate() {
 
@@ -85,6 +61,14 @@ class Scene {
       gameObject.draw();
     })
 
+    shaderProgram.setUniformMatrix4fv("u_MMatrix", Player.getModelMatrix());
+    let MVMatrix = glm.m4.multiply(this.camera.getViewMatrix(), Player.getModelMatrix())
+    let NMatrix = glm.transpose(glm.m4.inverse(MVMatrix));
+    shaderProgram.setUniformMatrix4fv("u_NMatrix", NMatrix);
+
+    // Draw object
+    Player.draw();
+    
     this.angle += 0.1;
   }
 }

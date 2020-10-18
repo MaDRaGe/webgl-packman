@@ -1,7 +1,5 @@
 import ShaderProgram from "./ShaderProgram";
-import GraphicObject from "./GraphicObject";
 import GameObject from './GameObject';
-import Mesh from "./Mesh";
 import Scene from "./Scene";
 import GL from "./GL";
 import { glm } from "./glm";
@@ -11,6 +9,7 @@ enum ObjectType {
   Space,
   Border,
   LightBorder,
+  Player
 }
 
 let map: ObjectType[][] = [
@@ -20,15 +19,14 @@ let map: ObjectType[][] = [
 [ObjectType.Border, ObjectType.Space, ObjectType.Border, ObjectType.Space,ObjectType.Border],
 [ObjectType.Border, ObjectType.Border, ObjectType.Border, ObjectType.Border,ObjectType.Border]]
 
-
+let Player: GameObject = new GameObject();
 let gameObjects: GameObject[] = [];
 let shaderProgram: ShaderProgram;
 let scene: Scene;
-
 async function dataInit() {
   GL.init("#scene");
   scene = new Scene();
-  ResourceManager.init('object.json');
+  await ResourceManager.init('object.json');
   shaderInit();
   loadObjects();
 }
@@ -39,7 +37,7 @@ function loadObjects() {
       gameObjects.push(ResourceManager.createObject(objectTypeNumber, new glm.vec2(columnIndex, rowIndex)));
     })
   })
-  console.log(gameObjects)
+  Player = ResourceManager.createObject(ObjectType.Player, new glm.vec2(1, 1));
 }
 
 function shaderInit() {
@@ -66,5 +64,6 @@ export {
   dataInit,
   shaderProgram,
   scene,
-  gameObjects
+  gameObjects,
+  Player
 };

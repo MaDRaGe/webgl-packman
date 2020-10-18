@@ -1,6 +1,6 @@
 import { scene } from "./data";
 
-function simulate() {
+function simulate(simulationTime: number): void {
   scene.simulate();
 }
 

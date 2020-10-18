@@ -1,6 +1,9 @@
 class GL {
   private simulationFunc: Function = () => {};
   private displayFunc: Function = () => {};
+  private lastSimulationTime: number = 0;
+  private nextSimulationTime: number = 0;
+  private simulationTime: number = 0;
 
   private gl: WebGLRenderingContext = <WebGLRenderingContext>
     document.createElement("canvas").getContext("webgl");
@@ -18,7 +21,12 @@ class GL {
   }
 
   public setSimulationFunc(func: Function): void {
-    this.simulationFunc = func;
+    this.simulationFunc = () => {
+      this.lastSimulationTime = this.nextSimulationTime;
+      this.nextSimulationTime = new Date().valueOf();
+      this.simulationTime = this.nextSimulationTime - this.lastSimulationTime;
+      func(this.simulationTime);
+    }
   }
 
   public setDisplayFunc(func: Function): void {

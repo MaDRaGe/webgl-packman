@@ -10,16 +10,16 @@ class ResourceManager {
 
   public async init(filepath: string): Promise<void> {
     const response = await (await fetch(`http://127.0.0.1:8887/assets/${filepath}`)).json();
-    this.initObject(ObjectType.Border, response["player"]);
-    console.log(this.meshNames);
+    this.initObject(ObjectType.Border, response["border"]);
+    this.initObject(ObjectType.Player, response["player"]);
   }
 
-  private async initObject(type: ObjectType, data: any): Promise<void> {
+  private initObject(type: ObjectType, data: any): void {
     if (this.meshNames.get(type)) {
       this.meshNames.set(type, data.mesh.name);
     } else {
       let mesh: Mesh = new Mesh();
-      await mesh.load(data.mesh.name);
+      mesh.load(data.mesh.name);
       this.meshNames.set(type, data.mesh.name);
       this.meshes.set(data.mesh.name, mesh);
     }

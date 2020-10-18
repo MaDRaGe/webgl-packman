@@ -6,9 +6,34 @@ class Camera {
   private vertRotateAngle: number = 45;
   private distanceToCenter: number = 20;
   private projectionMatrix: number[] = [];
+  private keysPressed: { [key: string]: boolean } = {};
 
   constructor() {
     this.calcPosition();
+    
+    document.addEventListener("keydown", (event) => {
+      event.preventDefault();
+      this.keysPressed[event.code] = true;
+      if (this.keysPressed["Space"]) {
+        setTimeout(() => {
+          this.zoom(1);
+        }, 10);
+      }
+      if (this.keysPressed["KeyD"]) {
+        setTimeout(() => {
+          this.rotateHoriz(-5);
+        }, 10)
+      }
+      if (this.keysPressed["KeyA"]) {
+        setTimeout(() => {
+          this.rotateHoriz(5);
+        }, 10)
+      }
+    })
+    document.addEventListener("keyup", (event) => {
+      delete this.keysPressed[event.code];
+    })
+  
   }
 
 
