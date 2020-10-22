@@ -4,6 +4,7 @@ import Scene from "./Scene";
 import GL from "./GL";
 import { glm } from "./glm";
 import ResourceManager from './ResourceManager';
+import Texture from './Texture';
 
 enum ObjectType {
   Space,
@@ -23,18 +24,22 @@ let Player: GameObject = new GameObject();
 let gameObjects: GameObject[] = [];
 let shaderProgram: ShaderProgram;
 let scene: Scene;
+let texture: Texture = new Texture;
 async function dataInit() {
   GL.init("#scene");
   scene = new Scene();
   await ResourceManager.init('object.json');
   shaderInit();
+  texture.load('light_object');
   loadObjects();
 }
 
 function loadObjects() {
   map.forEach((row: ObjectType[], rowIndex: number) => {
     row.forEach((objectTypeNumber: ObjectType, columnIndex: number) => {
-      gameObjects.push(ResourceManager.createObject(objectTypeNumber, new glm.vec2(columnIndex, rowIndex)));
+      if (objectTypeNumber === ObjectType.Border) {
+        gameObjects.push(ResourceManager.createObject(objectTypeNumber, new glm.vec2(columnIndex, rowIndex)));
+      }
     })
   })
   Player = ResourceManager.createObject(ObjectType.Player, new glm.vec2(1, 1));
@@ -52,6 +57,7 @@ function shaderInit() {
   shaderProgram.initUniform("u_ambientLightColor");
   shaderProgram.initUniform("u_diffuseLightColor");
   shaderProgram.initUniform("u_specularLightColor");
+  shaderProgram.initUniform('uTexture');
   shaderProgram.initUniform("u_VMatrix");
   shaderProgram.initAttr("a_vertexPosition");
   shaderProgram.initAttr("a_vertexTextureCoords");
@@ -65,5 +71,6 @@ export {
   shaderProgram,
   scene,
   gameObjects,
-  Player
+  Player,
+  texture
 };

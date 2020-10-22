@@ -6,7 +6,8 @@ const TerserWebpackPlugin = require('terser-webpack-plugin');
 const webpack = require('webpack');
 
 module.exports = {
-  entry: './src/main.ts',
+  context: path.resolve(__dirname, 'src'),
+  entry: 'main.ts',
   module: {
     rules: [
       {
@@ -40,6 +41,10 @@ module.exports = {
     contentBase: path.join(__dirname, 'dist'),
   },
   resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+      '@node_modules': path.resolve(__dirname, 'node_modules')
+    },
     extensions: [ '.tsx', '.ts', '.js' ],
     modules: ['node_modules', path.resolve(__dirname, 'src')],
   },

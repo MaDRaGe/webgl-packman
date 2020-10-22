@@ -36,10 +36,13 @@ class Mesh {
   // @ts-ignore
   private texCoordBuffer: WebGLBuffer;
 
+  private name: string = '';
+
   constructor() {}
 
-  public async load(name: String): Promise<void> {
+  public async load(name: string): Promise<void> {
     try {
+      this.name = name;
       const response = await fetch(
         `http://127.0.0.1:8887/assets/meshes/${name}.obj`
       );
@@ -159,6 +162,7 @@ class Mesh {
       0,
       0
     );
+    
     gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer);
     gl.vertexAttribPointer(
       shaderProgram.getVertexAttr("a_vertexTextureCoords"),

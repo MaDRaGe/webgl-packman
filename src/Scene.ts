@@ -3,7 +3,7 @@ import Mesh from "./Mesh";
 import { glm } from "./glm";
 import GL from "./GL";
 import Light from "./Light";
-import { shaderProgram, gameObjects, Player } from "./data";
+import { shaderProgram, gameObjects, Player, texture } from "./data";
 import Camera from "./Camera";
 import GameObject from "./GameObject";
 
@@ -46,6 +46,10 @@ class Scene {
     this.camera.setProjectionMatrix(45, gl.canvas.width / gl.canvas.height, 1, 2000);
     shaderProgram.setUniformMatrix4fv("u_PMatrix", this.camera.getProjectionMatrix());
 
+    // Texture
+    texture.apply()
+    shaderProgram.setUniform1i('uTexture', 0);
+
     // View matrix
     shaderProgram.setUniformMatrix4fv("u_VMatrix", this.camera.getViewMatrix());
 
@@ -61,13 +65,12 @@ class Scene {
       gameObject.draw();
     })
 
+    /*
     shaderProgram.setUniformMatrix4fv("u_MMatrix", Player.getModelMatrix());
     let MVMatrix = glm.m4.multiply(this.camera.getViewMatrix(), Player.getModelMatrix())
     let NMatrix = glm.transpose(glm.m4.inverse(MVMatrix));
     shaderProgram.setUniformMatrix4fv("u_NMatrix", NMatrix);
-
-    // Draw object
-    Player.draw();
+    Player.draw();*/
     
     this.angle += 0.1;
   }

@@ -59,9 +59,8 @@
           diffuseLightDot +
           u_specularLightColor * specularLightParam;
 
-
-
         gl_Position = u_PMatrix * MVMatrix * vec4(a_vertexPosition, 1);
+        vTextureCoords = a_vertexTextureCoords;
       }
     </script>
 
@@ -69,8 +68,12 @@
       precision mediump float;
       varying vec2 vTextureCoords;
       varying vec3 vLightWeighting;
+      uniform sampler2D uTexture;
       void main() {
-        gl_FragColor = vec4(vLightWeighting, 1.0) * vec4(1, 1, 1, 1);
+        gl_FragColor =
+          vec4(vLightWeighting, 1.0) *
+          vec4(1, 1, 1, 1) *
+          texture2D(uTexture, vTextureCoords);
       }
     </script>
     <!--<script src="./dist/main.js"></script>-->

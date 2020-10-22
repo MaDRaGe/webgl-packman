@@ -93,6 +93,10 @@ class ShaderProgram {
     gl.uniformMatrix4fv(<WebGLUniformLocation>this.uniforms.get(name), false, value);
   }
 
+  public setUniform1i(name: string, value: number): void {
+    GL.getGL().uniform1i(<WebGLUniformLocation>this.uniforms.get(name), value);
+  }
+
   public apply(): void {
     const gl = GL.getGL();
     gl.useProgram(this.shaderProgram);
