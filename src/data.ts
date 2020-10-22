@@ -30,7 +30,7 @@ async function dataInit() {
   scene = new Scene();
   await ResourceManager.init('object.json');
   shaderInit();
-  texture.load('light_object');
+  texture.load('border_object');
   loadObjects();
 }
 
